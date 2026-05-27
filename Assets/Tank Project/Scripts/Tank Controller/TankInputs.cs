@@ -30,22 +30,6 @@ public class TankInputs : NetworkBehaviour, INetworkRunnerCallbacks
 
         _isBoostActivated = Input.GetKey(KeyCode.LeftShift);
     }
-
-    private void OnTriggerEnter(Collider collision)
-    {
-        // // 1. Is it even a player?
-        // if (!collision.gameObject.CompareTag("Player")) return;
-
-        // // 2. THE FIX: Is it ME? 
-        // // transform.root checks the very top parent of the object.
-        // // If the turret and the hull share the same top parent, it is your own tank!
-        // if (collision.transform.root == transform.root) return;
-
-        // // 3. Aim at the valid enemy target
-        // Vector3 _targetDirection = collision.transform.position - transform.position;
-        // _targetDirection.y = 0;
-        // _turrentDirection = _targetDirection.normalized;
-    }
     #endregion
 
     #region Fusion Callbacks
@@ -75,6 +59,7 @@ public class TankInputs : NetworkBehaviour, INetworkRunnerCallbacks
             _isGrounded = _isTankGrounded,
         };
         _playerInput._buttons.Set(TankButtons.ResetPosition, Input.GetKey(KeyCode.R));
+        _playerInput._buttons.Set(TankButtons.Shoot, Input.GetButton("Fire1"));
 
         input.Set(_playerInput);
     }

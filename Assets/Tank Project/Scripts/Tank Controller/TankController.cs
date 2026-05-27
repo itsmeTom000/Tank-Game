@@ -10,13 +10,16 @@ public class TankController : NetworkBehaviour
     [Networked] private int ColorIndex { get; set; }
     [Networked] private PlayerInput CachedInput { get; set; }
     [Networked] public NetworkButtons PreviousButtons { get; set; }
-    #endregion 
+    [Networked] public TickTimer FireCooldown { get; set; }
+    #endregion
 
     [Header("Components")]
     [SerializeField] private Rigidbody _rigidbody;
     [SerializeField] private MeshRenderer _bodyMeshRenderer;
     [SerializeField] private Transform _turrent;
     [SerializeField] private Transform _visualTransform;
+    [SerializeField] private Transform _bulletSpawnPosition;
+    [SerializeField] private NetworkObject _bulletPrefab;
     [SerializeField] private Transform _targetVisual;
     [SerializeField] private TankInputs _tankInputs;
     [SerializeField] private SphereCollider _collider;
@@ -27,6 +30,11 @@ public class TankController : NetworkBehaviour
     [SerializeField] private float _rotationSpeed = 100f;
     [SerializeField] private float _resetDropDistance = 1f;
     [SerializeField] private float _accelerationRate = 5f; // How fast the engine spools up
+    [SerializeField] private float _fireCoolDownTime = 2f;
+
+    [Header("Arcade Juice")]
+    [SerializeField] private float _turnLeanAmount = 15f; // How many degrees to tilt
+    [SerializeField] private float _accelerationPitch = -5f;
 
     [Header("Physics Settings")]
     [SerializeField] private LayerMask _groundLayerMask;
@@ -109,10 +117,9 @@ public class TankController : NetworkBehaviour
         MovingTank(CachedInput._moveInput, CachedInput._isGrounded);
         RotatingTank(CachedInput._moveInput);
 
-        if (CachedInput._buttons.WasPressed(PreviousButtons, TankButtons.ResetPosition) && CachedInput._isGrounded)
-        {
-            ResettingTankPosition();
-        }
+        if (CachedInput._buttons.WasPressed(PreviousButtons, TankButtons.ResetPosition) && CachedInput._isGrounded) ResettingTankPosition();
+
+        if (CachedInput._buttons.WasPressed(PreviousButtons, TankButtons.Shoot)) ShootRocket();
 
         PreviousButtons = CachedInput._buttons;
     }
@@ -155,9 +162,23 @@ public class TankController : NetworkBehaviour
         _networkRigidbody.Teleport(_resetPosition, Quaternion.identity);
     }
 
-    private void RotatingTurrent(Vector3 _direction)
+    private void ShootRocket()
     {
-        _turrent.rotation = Quaternion.LookRotation(_direction, transform.forward);
+        if (FireCooldown.ExpiredOrNotRunning(Runner) == false) return;
+
+        Runner.Spawn(
+            _bulletPrefab,
+            _bulletSpawnPosition.position,
+            _bulletSpawnPosition.rotation,
+            Object.InputAuthority,
+            (runner, spawnedObj) =>
+            {
+                // Grab the rocket script and pass in our current Rigidbody velocity
+                spawnedObj.GetComponent<RocketScript>().InitNetworkState(_rigidbody.linearVelocity);
+            }
+        );
+
+        FireCooldown = TickTimer.CreateFromSeconds(Runner, _fireCoolDownTime);
     }
 
     private void CheckingGroundCheck()
@@ -189,15 +210,34 @@ public class TankController : NetworkBehaviour
         if (isGroundedVisually)
         {
             Vector3 trueForward = transform.forward;
-
             Vector3 projectedForward = Vector3.ProjectOnPlane(trueForward, hit.normal).normalized;
 
-            Quaternion targetRotation = Quaternion.LookRotation(projectedForward, hit.normal);
+            // 1. Calculate the base rotation hugging the ground
+            Quaternion baseTargetRotation = Quaternion.LookRotation(projectedForward, hit.normal);
 
+            // 2. ADD THE JUICE: Calculate fake G-Forces based on input
+            float leanAngle = 0f;
+            float pitchAngle = 0f;
+
+            if (HasInputAuthority) // Only lean based on our own keyboard input
+            {
+                // Lean left/right based on turning input
+                leanAngle = -Input.GetAxis("Horizontal") * _turnLeanAmount;
+
+                // Pitch nose up/down based on driving input
+                pitchAngle = Input.GetAxis("Vertical") * _accelerationPitch;
+            }
+
+            // Combine the G-Force tilt with the ground rotation
+            Quaternion juiceTilt = Quaternion.Euler(pitchAngle, 0f, leanAngle);
+            Quaternion finalRotation = baseTargetRotation * juiceTilt;
+
+            // 3. Smoothly apply it
             _targetVisual.rotation = Quaternion.Lerp(
                 _targetVisual.rotation,
-                targetRotation,
-                7.5f * Time.deltaTime);
+                finalRotation,
+                10f * Time.deltaTime
+            );
         }
     }
 }

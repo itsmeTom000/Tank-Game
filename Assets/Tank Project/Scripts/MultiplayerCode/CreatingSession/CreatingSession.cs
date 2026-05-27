@@ -85,7 +85,6 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
         ActiveRunner = Instantiate(_runnerPrefab);
         ActiveRunner.name = "Fusion Network Runner";
         ActiveRunner.ProvideInput = true;
-
         if (!ActiveRunner.TryGetComponent(out NetworkSceneManagerDefault _))
         {
             ActiveRunner.gameObject.AddComponent<NetworkSceneManagerDefault>();

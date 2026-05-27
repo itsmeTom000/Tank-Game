@@ -32,6 +32,37 @@ Transform:
   - {fileID: 8009528708486874319}
   m_Father: {fileID: 4933318430059752026}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5139366171961534437
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4682810064353074870}
+  m_Layer: 0
+  m_Name: SpawnPosition
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4682810064353074870
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5139366171961534437}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.28}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 883794521095968121}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5668021752844806780
 GameObject:
   m_ObjectHideFlags: 0
@@ -251,7 +282,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 4682810064353074870}
   m_Father: {fileID: 2184783410706979227}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &1692979565425668564
@@ -531,6 +563,8 @@ MonoBehaviour:
   _bodyMeshRenderer: {fileID: 8762959174395036057}
   _turrent: {fileID: 2184783410706979227}
   _visualTransform: {fileID: 641503150406851321}
+  _bulletSpawnPosition: {fileID: 4682810064353074870}
+  _bulletPrefab: {fileID: 5196958104057561130, guid: 018d66de5f18181499abf69f92f40ca7, type: 3}
   _targetVisual: {fileID: 8009528708486874319}
   _tankInputs: {fileID: 1653797578839388966}
   _collider: {fileID: 7959391632252945068}
@@ -539,6 +573,7 @@ MonoBehaviour:
   _rotationSpeed: 150
   _resetDropDistance: 5
   _accelerationRate: 5
+  _fireCoolDownTime: 2
   _groundLayerMask:
     serializedVersion: 2
     m_Bits: 64
