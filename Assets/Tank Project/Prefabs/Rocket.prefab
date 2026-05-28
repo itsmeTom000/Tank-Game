@@ -100,6 +100,11 @@ MonoBehaviour:
   _InheritedVelocity: {x: 0, y: 0, z: 0}
   _launchForce: 70
   _lifeTime: 2.5
+  _damageAmout: 15
+  _damageRadious: 10
+  _collisionLayer:
+    serializedVersion: 2
+    m_Bits: 128
   _networkRigidBody: {fileID: 6628550067267631198}
   _smokeTrail: {fileID: 7282585407037098795}
   _explosionParticles: {fileID: 198656289721292014, guid: 64891a0eb28db934898420d80ca07cb3, type: 3}

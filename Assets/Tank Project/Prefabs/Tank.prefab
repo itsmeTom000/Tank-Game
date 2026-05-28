@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 641503150406851321}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Visual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -32,6 +32,110 @@ Transform:
   - {fileID: 8009528708486874319}
   m_Father: {fileID: 4933318430059752026}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4712123625243469259
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1608239709058862303}
+  - component: {fileID: 8915283590448194353}
+  m_Layer: 7
+  m_Name: TurrentHitBox
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1608239709058862303
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4712123625243469259}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4933318430059752026}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8915283590448194353
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4712123625243469259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1014831617, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.Hitbox
+  Type: 1
+  SphereRadius: 0
+  CapsuleRadius: 0.46
+  BoxExtents: {x: 0.72, y: 0.48, z: 1.2}
+  CapsuleExtents: 2.16
+  Offset: {x: 0, y: 1.25, z: 0.27}
+  Root: {fileID: 8686565269016124641}
+  GizmosColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+--- !u!1 &5110845092918603543
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8236921159912688442}
+  - component: {fileID: 180951432092069765}
+  m_Layer: 7
+  m_Name: BodyHitBox
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8236921159912688442
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5110845092918603543}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4933318430059752026}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &180951432092069765
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5110845092918603543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1014831617, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.Hitbox
+  Type: 1
+  SphereRadius: 0
+  CapsuleRadius: 0
+  BoxExtents: {x: 1, y: 0.7, z: 1.2}
+  CapsuleExtents: 0
+  Offset: {x: 0, y: 0, z: 0}
+  Root: {fileID: 8686565269016124641}
+  GizmosColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!1 &5139366171961534437
 GameObject:
   m_ObjectHideFlags: 0
@@ -41,7 +145,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4682810064353074870}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: SpawnPosition
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -74,7 +178,7 @@ GameObject:
   - component: {fileID: 8009528708486874319}
   - component: {fileID: 565756046446735661}
   - component: {fileID: 2519491388190732732}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Tank
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -169,7 +273,7 @@ GameObject:
   - component: {fileID: 2184783410706979227}
   - component: {fileID: 7888317906027266956}
   - component: {fileID: 8762959174395036057}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Turrent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -263,7 +367,7 @@ GameObject:
   - component: {fileID: 883794521095968121}
   - component: {fileID: 1692979565425668564}
   - component: {fileID: 8904524914052337517}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Turent_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -355,7 +459,7 @@ GameObject:
   - component: {fileID: 3315282382129174622}
   - component: {fileID: 5215022073088916290}
   - component: {fileID: 5587549757507874401}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Base
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -451,9 +555,11 @@ GameObject:
   - component: {fileID: 1653797578839388966}
   - component: {fileID: 1744654633519022620}
   - component: {fileID: 8858483456676244394}
+  - component: {fileID: 8453356744948629644}
   - component: {fileID: 4854514782140552355}
   - component: {fileID: 251709682731658126}
-  m_Layer: 0
+  - component: {fileID: 8686565269016124641}
+  m_Layer: 7
   m_Name: Tank
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -474,6 +580,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 641503150406851321}
+  - {fileID: 8236921159912688442}
+  - {fileID: 1608239709058862303}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &4778921937564840101
@@ -546,6 +654,8 @@ MonoBehaviour:
   - {fileID: 1653797578839388966}
   - {fileID: 1744654633519022620}
   - {fileID: 8858483456676244394}
+  - {fileID: 8453356744948629644}
+  - {fileID: 8686565269016124641}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &4668551546555707684
 MonoBehaviour:
@@ -653,6 +763,19 @@ MonoBehaviour:
   _pushToTalkKey: 109
   _speaker: {fileID: 251709682731658126}
   _image: {fileID: 8251037312483851618}
+--- !u!114 &8453356744948629644
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8208673601468754611}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f22da52e279d64b478fdd45c7b181c6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TankHealth
+  _Health: 100
 --- !u!82 &4854514782140552355
 AudioSource:
   m_ObjectHideFlags: 0
@@ -768,6 +891,24 @@ MonoBehaviour:
     Max: 1000
     SpeedUpPerc: 5
   restartOnDeviceChange: 1
+--- !u!114 &8686565269016124641
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8208673601468754611}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1039544458, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.HitboxRoot
+  Config: 3
+  BroadRadius: 1.7117243
+  Offset: {x: 0, y: 0, z: 0}
+  GizmosColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  Hitboxes:
+  - {fileID: 180951432092069765}
 --- !u!1 &8251037312483851618
 GameObject:
   m_ObjectHideFlags: 0
@@ -779,7 +920,7 @@ GameObject:
   - component: {fileID: 3542811524324054580}
   - component: {fileID: 8292395136412847772}
   - component: {fileID: 7934646902969672656}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Mic
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -173,7 +173,6 @@ public class TankController : NetworkBehaviour
         Object.InputAuthority,
         (runner, spawnedObj) =>
         {
-            // Grab the rocket script and pass in our current Rigidbody velocity
             spawnedObj.GetComponent<RocketScript>().ShootRocket(_networkRigidbody.Rigidbody.linearVelocity, Object.InputAuthority);
         }
     );

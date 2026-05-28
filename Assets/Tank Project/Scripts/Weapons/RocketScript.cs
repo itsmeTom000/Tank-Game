@@ -9,8 +9,10 @@ public class RocketScript : NetworkBehaviour
     [Networked] public Vector3 InheritedVelocity { get; set; }
 
     [Header("Rocket Stats")]
-    [SerializeField] private float _launchForce = 50f; // We use Force instead of Speed now!
+    [SerializeField] private float _launchForce = 50f;
     [SerializeField] private float _lifeTime = 2.5f;
+    [SerializeField] private float _damageAmout = 15f;
+    [SerializeField] private float _damageRadious = 4f;
     [SerializeField] private LayerMask _collisionLayer;
 
     [Header("Visual Juice")]
@@ -20,57 +22,96 @@ public class RocketScript : NetworkBehaviour
     [SerializeField] private GameObject _rocketMesh;
 
     #region Private Properties
-    private PlayerRef _playerRef;
-    private List<LagCompensatedHit> _hits = new();
+    public PlayerRef _playerRef;
+    public List<LagCompensatedHit> _hits = new();
     #endregion
 
     public override void Spawned()
     {
         base.Spawned();
         Runner.SetIsSimulated(Object, true);
+
+        if (_rocketMesh != null) _rocketMesh.SetActive(true);
+        if (_smokeTrail != null) _smokeTrail.Clear();
     }
 
     public void ShootRocket(Vector3 shooterVelocity, PlayerRef playerRef)
     {
         InheritedVelocity = shooterVelocity;
         _playerRef = playerRef;
+
         if (HasStateAuthority)
         {
+            // 1. RESTORED: Actually start the death timer!
             DespawnTimer = TickTimer.CreateFromSeconds(Runner, _lifeTime);
 
             _networkRigidBody.Rigidbody.AddForce(InheritedVelocity + (transform.forward * _launchForce), ForceMode.VelocityChange);
         }
-
-        if (_rocketMesh != null) _rocketMesh.SetActive(true);
-        if (_smokeTrail != null) _smokeTrail.Clear();
     }
 
     public override void FixedUpdateNetwork()
     {
+        if (!HasStateAuthority) return;
 
-        if (HasStateAuthority && DespawnTimer.Expired(Runner))
+        // 2. RESTORED: Destroy the rocket if it flew for too long and missed everything
+        if (DespawnTimer.Expired(Runner))
         {
             Runner.Despawn(Object);
         }
     }
 
+    // 3. RESTORED: Only check for damage when we physically hit a wall or a player
     private void OnCollisionEnter(Collision other)
     {
+        // Safety lock to prevent double-impact crashes
+        if (Object == null || Object.IsValid == false) return;
+
         if (HasStateAuthority)
         {
-            int hits = Runner.LagCompensation.OverlapSphere(transform.position, .5f, _playerRef, _hits, _collisionLayer);
+            int hitCount = Runner.LagCompensation.OverlapSphere(
+                transform.position,
+                _damageRadious,
+                _playerRef,
+                _hits,
+                _collisionLayer
+            );
 
-            for (int i = 0; i < hits; i++)
+            // Loop through all hits and deal damage
+            for (int i = 0; i < hitCount; i++)
             {
-                
+                Transform root = _hits[i].Hitbox.Root.transform;
+                Debug.Log(root.name);
+                if (root == null) continue;
+
+                if (root.TryGetComponent(out TankHealth tankHealth))
+                {
+                    tankHealth.TakeDamage(_damageAmout);
+                }
             }
+
+            // 4. FIXED: Despawn happens exactly ONCE, completely outside the loop!
             Runner.Despawn(Object);
         }
     }
 
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
-        ParticleSystem explosion = Instantiate(_explosionParticles, _rocketMesh.transform.position, Quaternion.identity);
-        Destroy(explosion.gameObject, explosion.main.duration);
+        if (_explosionParticles != null)
+        {
+            ParticleSystem explosion = Instantiate(_explosionParticles, _rocketMesh.transform.position, Quaternion.identity);
+            Destroy(explosion.gameObject, explosion.main.duration);
+        }
+
+        if (_smokeTrail != null)
+        {
+            _smokeTrail.transform.SetParent(null);
+            _smokeTrail.autodestruct = true;
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, _damageRadious);
     }
 }
