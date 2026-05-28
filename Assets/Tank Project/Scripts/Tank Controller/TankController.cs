@@ -11,10 +11,9 @@ public class TankController : NetworkBehaviour
     [Networked] private PlayerInput CachedInput { get; set; }
     [Networked] public NetworkButtons PreviousButtons { get; set; }
     [Networked] public TickTimer FireCooldown { get; set; }
-    #endregion
+    #endregion 
 
     [Header("Components")]
-    [SerializeField] private Rigidbody _rigidbody;
     [SerializeField] private MeshRenderer _bodyMeshRenderer;
     [SerializeField] private Transform _turrent;
     [SerializeField] private Transform _visualTransform;
@@ -51,12 +50,12 @@ public class TankController : NetworkBehaviour
 
     private void Awake()
     {
-        if (_rigidbody == null) _rigidbody = GetComponent<Rigidbody>();
         _networkRigidbody = GetComponent<NetworkRigidbody3D>();
     }
 
     public override void Spawned()
     {
+        Runner.SetIsSimulated(Object, true);
         if (HasStateAuthority)
         {
             ColorIndex = Random.Range(0, _tankColors.Length);
@@ -69,7 +68,6 @@ public class TankController : NetworkBehaviour
 
             _coordinatePanel = FindAnyObjectByType<CoordinatePanel>();
             if (_coordinatePanel != null) _coordinatePanel.Open();
-            Runner.SetIsSimulated(Object, true);
         }
 
         SettingTankColor();
@@ -132,12 +130,12 @@ public class TankController : NetworkBehaviour
 
         if (!_isTankGrounded)
         {
-            _rigidbody.linearVelocity = new Vector3(_rigidbody.linearVelocity.x, _rigidbody.linearVelocity.y, _rigidbody.linearVelocity.z);
-            _rigidbody.AddForce(Vector3.down * _extraGravity, ForceMode.Acceleration);
+            _networkRigidbody.Rigidbody.linearVelocity = new Vector3(_networkRigidbody.Rigidbody.linearVelocity.x, _networkRigidbody.Rigidbody.linearVelocity.y, _networkRigidbody.Rigidbody.linearVelocity.z);
+            _networkRigidbody.Rigidbody.AddForce(Vector3.down * _extraGravity, ForceMode.Acceleration);
         }
         else
         {
-            _rigidbody.linearVelocity = new Vector3(_velocity.x, _velocity.y - .2f, _velocity.z);
+            _networkRigidbody.Rigidbody.linearVelocity = new Vector3(_velocity.x, _velocity.y - .2f, _velocity.z);
         }
     }
 
@@ -145,7 +143,7 @@ public class TankController : NetworkBehaviour
     {
         float rotationAmount = moveInput.x * _rotationSpeed * Runner.DeltaTime;
         Quaternion deltaRotation = Quaternion.Euler(0f, rotationAmount, 0f);
-        _rigidbody.MoveRotation(_rigidbody.rotation * deltaRotation);
+        _networkRigidbody.Rigidbody.MoveRotation(_networkRigidbody.Rigidbody.rotation * deltaRotation);
     }
 
     private void SettingTankColor()
@@ -166,17 +164,19 @@ public class TankController : NetworkBehaviour
     {
         if (FireCooldown.ExpiredOrNotRunning(Runner) == false) return;
 
+        if (!HasStateAuthority) return;
+
         Runner.Spawn(
-            _bulletPrefab,
-            _bulletSpawnPosition.position,
-            _bulletSpawnPosition.rotation,
-            Object.InputAuthority,
-            (runner, spawnedObj) =>
-            {
-                // Grab the rocket script and pass in our current Rigidbody velocity
-                spawnedObj.GetComponent<RocketScript>().InitNetworkState(_rigidbody.linearVelocity);
-            }
-        );
+        _bulletPrefab,
+        _bulletSpawnPosition.position,
+        _bulletSpawnPosition.rotation,
+        Object.InputAuthority,
+        (runner, spawnedObj) =>
+        {
+            // Grab the rocket script and pass in our current Rigidbody velocity
+            spawnedObj.GetComponent<RocketScript>().ShootRocket(_networkRigidbody.Rigidbody.linearVelocity, Object.InputAuthority);
+        }
+    );
 
         FireCooldown = TickTimer.CreateFromSeconds(Runner, _fireCoolDownTime);
     }

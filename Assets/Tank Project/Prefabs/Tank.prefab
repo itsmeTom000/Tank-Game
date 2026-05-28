@@ -502,7 +502,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 112
-  m_CollisionDetection: 2
+  m_CollisionDetection: 1
 --- !u!135 &7959391632252945068
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -559,7 +559,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b038f5ea44e5df4ba90de232608ef81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TankController
-  _rigidbody: {fileID: 4778921937564840101}
   _bodyMeshRenderer: {fileID: 8762959174395036057}
   _turrent: {fileID: 2184783410706979227}
   _visualTransform: {fileID: 641503150406851321}
@@ -574,6 +573,8 @@ MonoBehaviour:
   _resetDropDistance: 5
   _accelerationRate: 5
   _fireCoolDownTime: 2
+  _turnLeanAmount: 15
+  _accelerationPitch: -5
   _groundLayerMask:
     serializedVersion: 2
     m_Bits: 64
