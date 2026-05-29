@@ -6,13 +6,14 @@ using UnityEngine;
 [RequireComponent(typeof(NetworkRigidbody3D))]
 public class TankController : NetworkBehaviour
 {
-    #region Network Properties
+    #region Networked Properties
     [Networked] private int ColorIndex { get; set; }
     [Networked] private PlayerInput CachedInput { get; set; }
     [Networked] public NetworkButtons PreviousButtons { get; set; }
     [Networked] public TickTimer FireCooldown { get; set; }
     #endregion 
 
+    #region Inspector Components
     [Header("Components")]
     [SerializeField] private MeshRenderer _bodyMeshRenderer;
     [SerializeField] private Transform _turrent;
@@ -22,7 +23,9 @@ public class TankController : NetworkBehaviour
     [SerializeField] private Transform _targetVisual;
     [SerializeField] private TankInputs _tankInputs;
     [SerializeField] private SphereCollider _collider;
+    #endregion
 
+    #region Inspector Settings
     [Header("Movement Stats")]
     [SerializeField] private float _moveSpeed = 5f;
     [SerializeField] private float _boostSpeed = 10f;
@@ -41,18 +44,33 @@ public class TankController : NetworkBehaviour
     [SerializeField] private float _extraGravity = 40f;
     [SerializeField] private Color[] _tankColors;
 
+    [Header("Muzzle Particle")]
+    [SerializeField] private ParticleSystem _muzzleFlashParticle;
+    [SerializeField] private AudioSource _muzzleSound;
+    #endregion
+
+    #region Private State Variables
     private float _currentSpeed;
     private bool _isTankGrounded;
     private Vector3 _groundNormal = Vector3.up;
     private CoordinatePanel _coordinatePanel;
     private CameraFollowing _cameraFollowing;
     private NetworkRigidbody3D _networkRigidbody;
+    #endregion
 
+    #region Unity Lifecycle
     private void Awake()
     {
         _networkRigidbody = GetComponent<NetworkRigidbody3D>();
     }
 
+    private void Update()
+    {
+        _coordinatePanel?.SetCoordinates(transform.position);
+    }
+    #endregion
+
+    #region Fusion Lifecycle
     public override void Spawned()
     {
         Runner.SetIsSimulated(Object, true);
@@ -71,11 +89,6 @@ public class TankController : NetworkBehaviour
         }
 
         SettingTankColor();
-    }
-
-    private void Update()
-    {
-        _coordinatePanel?.SetCoordinates(transform.position);
     }
 
     public override void Render()
@@ -115,13 +128,17 @@ public class TankController : NetworkBehaviour
         MovingTank(CachedInput._moveInput, CachedInput._isGrounded);
         RotatingTank(CachedInput._moveInput);
 
-        if (CachedInput._buttons.WasPressed(PreviousButtons, TankButtons.ResetPosition) && CachedInput._isGrounded) ResettingTankPosition();
+        if (CachedInput._buttons.WasPressed(PreviousButtons, TankButtons.ResetPosition) && CachedInput._isGrounded)
+            ResettingTankPosition();
 
-        if (CachedInput._buttons.WasPressed(PreviousButtons, TankButtons.Shoot)) ShootRocket();
+        if (CachedInput._buttons.WasPressed(PreviousButtons, TankButtons.Shoot))
+            ShootRocket();
 
         PreviousButtons = CachedInput._buttons;
     }
+    #endregion
 
+    #region Movement & Physics Logic
     private void MovingTank(Vector3 moveInput, bool _isTankGrounded)
     {
         Vector3 slopeForward = Vector3.ProjectOnPlane(transform.forward, _groundNormal).normalized;
@@ -146,40 +163,6 @@ public class TankController : NetworkBehaviour
         _networkRigidbody.Rigidbody.MoveRotation(_networkRigidbody.Rigidbody.rotation * deltaRotation);
     }
 
-    private void SettingTankColor()
-    {
-        if (_tankColors.Length > 0)
-        {
-            _bodyMeshRenderer.material.color = _tankColors[ColorIndex];
-        }
-    }
-
-    private void ResettingTankPosition()
-    {
-        Vector3 _resetPosition = transform.position + (Vector3.up * _resetDropDistance);
-        _networkRigidbody.Teleport(_resetPosition, Quaternion.identity);
-    }
-
-    private void ShootRocket()
-    {
-        if (FireCooldown.ExpiredOrNotRunning(Runner) == false) return;
-
-        if (!HasStateAuthority) return;
-
-        Runner.Spawn(
-        _bulletPrefab,
-        _bulletSpawnPosition.position,
-        _bulletSpawnPosition.rotation,
-        Object.InputAuthority,
-        (runner, spawnedObj) =>
-        {
-            spawnedObj.GetComponent<RocketScript>().ShootRocket(_networkRigidbody.Rigidbody.linearVelocity, Object.InputAuthority);
-        }
-    );
-
-        FireCooldown = TickTimer.CreateFromSeconds(Runner, _fireCoolDownTime);
-    }
-
     private void CheckingGroundCheck()
     {
         float checkRadius = _collider.radius - 0.05f;
@@ -194,6 +177,46 @@ public class TankController : NetworkBehaviour
         );
         // Save the normal so our movement math knows the angle of the hill!
         _groundNormal = _isTankGrounded ? hit.normal : Vector3.up;
+    }
+
+    private void ResettingTankPosition()
+    {
+        Vector3 _resetPosition = transform.position + (Vector3.up * _resetDropDistance);
+        _networkRigidbody.Teleport(_resetPosition, Quaternion.identity);
+    }
+    #endregion
+
+    #region Combat Logic
+    private void ShootRocket()
+    {
+        if (FireCooldown.ExpiredOrNotRunning(Runner) == false) return;
+
+        if (!HasStateAuthority) return;
+
+        Runner.Spawn(
+            _bulletPrefab,
+            _bulletSpawnPosition.position,
+            _bulletSpawnPosition.rotation,
+            Object.InputAuthority,
+            (runner, spawnedObj) =>
+            {
+                spawnedObj.GetComponent<RocketScript>().ShootRocket(_networkRigidbody.Rigidbody.linearVelocity, Object.InputAuthority);
+            }
+        );
+
+        PlayMuzzleFlash();
+        RPC_MuzzleFlash();
+        FireCooldown = TickTimer.CreateFromSeconds(Runner, _fireCoolDownTime);
+    }
+    #endregion
+
+    #region Visuals & Polish
+    private void SettingTankColor()
+    {
+        if (_tankColors.Length > 0)
+        {
+            _bodyMeshRenderer.material.color = _tankColors[ColorIndex];
+        }
     }
 
     private void GroundRotation()
@@ -239,4 +262,21 @@ public class TankController : NetworkBehaviour
             );
         }
     }
+    #endregion
+
+    #region RPC
+    [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)]
+    private void RPC_MuzzleFlash()
+    {
+        PlayMuzzleFlash();
+    }
+
+    private void PlayMuzzleFlash()
+    {
+        if (_muzzleFlashParticle != null)
+        {
+            _muzzleFlashParticle.Play();
+        }
+    }
+    #endregion
 }

@@ -6,7 +6,6 @@ using UnityEngine;
 public class RocketScript : NetworkBehaviour
 {
     [Networked] private TickTimer DespawnTimer { get; set; }
-    [Networked] public Vector3 InheritedVelocity { get; set; }
 
     [Header("Rocket Stats")]
     [SerializeField] private float _launchForce = 50f;
@@ -24,6 +23,10 @@ public class RocketScript : NetworkBehaviour
     #region Private Properties
     public PlayerRef _playerRef;
     public List<LagCompensatedHit> _hits = new();
+    #endregion
+
+    #region Private Properties
+    private Vector3 InheritedVelocity { get; set; }
     #endregion
 
     public override void Spawned()
@@ -75,14 +78,12 @@ public class RocketScript : NetworkBehaviour
                 _hits,
                 _collisionLayer
             );
-
             // Loop through all hits and deal damage
             for (int i = 0; i < hitCount; i++)
             {
                 Transform root = _hits[i].Hitbox.Root.transform;
                 Debug.Log(root.name);
                 if (root == null) continue;
-
                 if (root.TryGetComponent(out TankHealth tankHealth))
                 {
                     tankHealth.TakeDamage(_damageAmout);

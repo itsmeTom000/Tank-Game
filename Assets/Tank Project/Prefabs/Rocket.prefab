@@ -97,9 +97,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4e192b7fd4a6c5439e2fd37d23bb98b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RocketScript
-  _InheritedVelocity: {x: 0, y: 0, z: 0}
   _launchForce: 70
-  _lifeTime: 2.5
+  _lifeTime: 5
   _damageAmout: 15
   _damageRadious: 10
   _collisionLayer:
@@ -107,7 +106,7 @@ MonoBehaviour:
     m_Bits: 128
   _networkRigidBody: {fileID: 6628550067267631198}
   _smokeTrail: {fileID: 7282585407037098795}
-  _explosionParticles: {fileID: 198656289721292014, guid: 64891a0eb28db934898420d80ca07cb3, type: 3}
+  _explosionParticles: {fileID: 2433282508523890284, guid: 3ef3ae421f71c5c4e97fe12dc2fc6312, type: 3}
   _rocketMesh: {fileID: 772106208468992944}
 --- !u!114 &5196958104057561130
 MonoBehaviour:
@@ -291,7 +290,7 @@ TrailRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Time: 0.1
+  m_Time: 0.2
   m_PreviewTimeScale: 1
   m_Parameters:
     serializedVersion: 3

@@ -3,10 +3,10 @@ using UnityEngine;
 public class CameraFollowing : MonoBehaviour
 {
     [Header("Camera Settings")]
-    [SerializeField] private Vector3 _offset = new Vector3(0, 5, -10);
+    [SerializeField] private Vector3 _offset = new (0, 5, -10);
     // 1. Changed smoothFactor to smoothTime. Lower numbers = tighter follow. 0.1 is usually perfect!
-    [SerializeField] private float _positionSmoothTime = 0.1f; 
-    
+    [SerializeField] private float _positionSmoothTime = 0.1f;
+
     [Header("Zoom Settings")]
     [SerializeField] private float _zoomSpeed = 10f;
     [SerializeField] private float _minZoomDistance = 5f;
@@ -14,7 +14,7 @@ public class CameraFollowing : MonoBehaviour
 
     private Transform _target;
     private float _currentZoomDistance;
-    
+
     // 2. SmoothDamp requires a blank Vector3 to store the camera's momentum behind the scenes
     private Vector3 _velocity = Vector3.zero;
 
@@ -36,19 +36,25 @@ public class CameraFollowing : MonoBehaviour
 
     public void MovingCamera()
     {
-        // Calculate the exact target position by taking the direction of the offset and multiplying it by our zoom level
-        Vector3 _endPosition = _target.position + (_offset.normalized * _currentZoomDistance);
-        
-        // 3. THE FIX: Replace Lerp with SmoothDamp to completely eliminate high-speed stutter!
+        // 1. THE OFFSET FIX: Rotate the offset so it is always glued to the BACK of the tank!
+        Vector3 rotatedOffset = _target.rotation * _offset.normalized;
+        Vector3 _endPosition = _target.position + (rotatedOffset * _currentZoomDistance);
+
+        // 2. POSITION: SmoothDamp smoothly drags the camera to that new spot
         transform.position = Vector3.SmoothDamp(
-            transform.position, 
-            _endPosition, 
-            ref _velocity, 
+            transform.position,
+            _endPosition,
+            ref _velocity,
             _positionSmoothTime
         );
-        
-        // Always look directly at the tank
-        transform.LookAt(_target.position);
+
+        // 3. ROTATION: Always look perfectly at the center of the tank!
+        // We use the direction FROM the camera TO the tank.
+        Vector3 lookDirection = _target.position - transform.position;
+
+        // (Optional Juice) We use Quaternion.Slerp so the rotation has a tiny bit of soft lag
+        Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 15f * Time.deltaTime);
     }
 
     private void MouseInput()
