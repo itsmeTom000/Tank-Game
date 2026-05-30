@@ -12,8 +12,10 @@ GameObject:
   - component: {fileID: 1466838289047076977}
   - component: {fileID: 1279674747797831528}
   - component: {fileID: 864951940936176359}
+  - component: {fileID: 9090468379197357144}
   - component: {fileID: 3939164860259020213}
   - component: {fileID: 8887037500298082022}
+  - component: {fileID: 4038454089400210133}
   m_Layer: 0
   m_Name: Runner
   m_TagString: Untagged
@@ -134,6 +136,21 @@ MonoBehaviour:
   ClientPhysicsSimulation: 3
   DeltaTimeMultiplier: 1
   SetUnityFixedTimestep: 0
+--- !u!114 &9090468379197357144
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3208356695025013502}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -49887739, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.HitboxManager
+  BVHDepth: 0
+  BVHNodes: 0
+  TotalHitboxes: 0
 --- !u!114 &3939164860259020213
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -196,7 +213,7 @@ MonoBehaviour:
   debugEchoMode: 0
   reliableMode: 0
   encrypt: 0
-  transmitEnabled: 0
+  transmitEnabled: 1
   samplingRate: 48000
   frameDuration: 40000
   bitrate: 30000
@@ -217,4 +234,19 @@ MonoBehaviour:
   stopRecordingWhenPaused: 0
   useOnAudioFilterRead: 0
   useMicrophoneTypeFallback: 1
-  recordWhenJoined: 1
+  recordWhenJoined: 0
+--- !u!114 &4038454089400210133
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3208356695025013502}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7f95aa3c06eaa84bba4eafdedf12758, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: PhotonVoice::Photon.Voice.Unity.AudioChangesHandler
+  HandleDeviceChange: 1
+  HandleDeviceChangeIOS: 1
+  HandleDeviceChangeAndroid: 1

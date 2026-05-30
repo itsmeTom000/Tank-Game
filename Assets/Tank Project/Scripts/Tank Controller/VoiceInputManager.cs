@@ -16,12 +16,19 @@ public class VoiceInputManager : NetworkBehaviour
     private void Awake()
     {
         _image.SetActive(false);
-        _voiceRecorder = FindAnyObjectByType<Recorder>();
-        _remoteAudio = _speaker.GetComponent<AudioSource>();
+    }
 
-        if (_voiceRecorder != null)
+    public override void Spawned()
+    {
+        if (HasInputAuthority)
         {
-            _voiceRecorder.TransmitEnabled = false;
+            _voiceRecorder = FindAnyObjectByType<Recorder>();
+            _remoteAudio = _speaker.GetComponent<AudioSource>();
+
+            if (_voiceRecorder != null)
+            {
+                _voiceRecorder.RecordingEnabled = false;
+            }
         }
     }
 
@@ -35,7 +42,7 @@ public class VoiceInputManager : NetworkBehaviour
             if (Input.GetKeyDown(_pushToTalkKey))
             {
                 _isMicOn = !_isMicOn;
-                _voiceRecorder.TransmitEnabled = _isMicOn;
+                _voiceRecorder.RecordingEnabled = _isMicOn;
             }
 
             _image.SetActive(_isMicOn);
@@ -64,8 +71,8 @@ public class VoiceInputManager : NetworkBehaviour
                     float averageVolume = totalVolume / 64f;
 
                     // You can tweak this number if it's too sensitive!
-                    Debug.Log(averageVolume > 0.005f);
-                    _image.SetActive(averageVolume > 0.005f);
+                    Debug.Log(averageVolume > 0.002f);
+                    _image.SetActive(averageVolume > 0.002f);
                 }
             }
             else

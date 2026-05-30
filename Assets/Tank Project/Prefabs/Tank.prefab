@@ -30,7 +30,6 @@ Transform:
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 8009528708486874319}
-  - {fileID: 8100811998876010643}
   m_Father: {fileID: 4933318430059752026}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1029076792261023304
@@ -19455,7 +19454,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &8100811998876010643
 RectTransform:
   m_ObjectHideFlags: 0
@@ -19463,17 +19462,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3266395432690921864}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.2596}
+  m_LocalRotation: {x: 0.000000037748947, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0.2824272}
   m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8015960028199251055}
-  m_Father: {fileID: 641503150406851321}
+  m_Father: {fileID: 8009528708486874319}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.16759998, y: 0.3722}
+  m_AnchoredPosition: {x: -0.16891223, y: 0.39069897}
   m_SizeDelta: {x: 1, y: 0.3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &6372001705095435070
@@ -19708,6 +19707,7 @@ Transform:
   - {fileID: 7551811630803403431}
   - {fileID: 3315282382129174622}
   - {fileID: 2184783410706979227}
+  - {fileID: 8100811998876010643}
   m_Father: {fileID: 641503150406851321}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &565756046446735661
@@ -20163,7 +20163,7 @@ AudioSource:
   Priority: 80
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 20
+  MaxDistance: 15
   Pan2D: 0
   rolloffMode: 0
   BypassEffects: 0
@@ -20198,7 +20198,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 1
+      value: 0.7
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -20411,7 +20411,7 @@ MonoBehaviour:
   _respawnDelay: 3
   _playerdata: {fileID: 11400000, guid: 52a76b805433f784783b6aa850356281, type: 2}
   _deathExplosion: {fileID: 7226888052703040407, guid: 7ec363c8df426644ea85f8d6d570561c, type: 3}
-  _tankVisuals: {fileID: 278143516651375040}
+  _tankVisuals: {fileID: 5668021752844806780}
 --- !u!114 &8686565269016124641
 MonoBehaviour:
   m_ObjectHideFlags: 0

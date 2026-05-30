@@ -103,7 +103,7 @@ public class TankData : NetworkBehaviour
 
             if (_deathExplosion != null)
             {
-                ParticleSystem explosion = Instantiate(_deathExplosion, transform.position, Quaternion.LookRotation(Vector3.up));
+                ParticleSystem explosion = Instantiate(_deathExplosion, transform.position, Quaternion.LookRotation(_tankVisuals.transform.up, _deathExplosion.gameObject.transform.forward));
                 Destroy(explosion.gameObject, explosion.main.duration);
             }
         }

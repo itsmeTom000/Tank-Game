@@ -4,4 +4,12 @@ public static class Enums
     {
         Enemy
     }
+
+    public enum OnSessionLifeCycle
+    {
+        Creating,
+        Joining,
+        Failed,
+        Successfully
+    }
 }

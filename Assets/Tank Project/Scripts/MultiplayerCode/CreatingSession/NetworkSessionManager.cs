@@ -23,6 +23,10 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
     public NetworkRunner ActiveRunner { get; private set; }
     #endregion
 
+    #region Public Events
+    public event Action<Enums.OnSessionLifeCycle> OnSessionLifeCycle;
+    #endregion
+
     #region Private Properties
     private bool _isSessionStarted = false;
     #endregion
@@ -53,6 +57,15 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
         if (_isSessionStarted) return;
         _isSessionStarted = true;
 
+        if (gameMode == GameMode.Host)
+        {
+            OnSessionLifeCycle?.Invoke(Enums.OnSessionLifeCycle.Creating);
+        }
+        else
+        {
+            OnSessionLifeCycle?.Invoke(Enums.OnSessionLifeCycle.Joining);
+        }
+
         InitializeNetworkRunner();
 
         var sceneRef = SceneRef.FromIndex(sceneIndex);
@@ -73,11 +86,13 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
         if (result.Ok)
         {
             Debug.Log("[NetworkSessionManager] Successfully connected to session.");
+            OnSessionLifeCycle?.Invoke(Enums.OnSessionLifeCycle.Successfully);
             ActiveRunner.AddCallbacks(this);
         }
         else
         {
             _isSessionStarted = false;
+            OnSessionLifeCycle?.Invoke(Enums.OnSessionLifeCycle.Failed);
             Debug.LogError($"[NetworkSessionManager] Failed to start game: {result.ShutdownReason}");
             CleanupRunner();
         }
