@@ -5,6 +5,7 @@ using Fusion.Sockets;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
 {
@@ -14,6 +15,8 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField] private int _gameplaySceneIndex = 1;
     [SerializeField] private Button _createRoom;
     [SerializeField] private Button _joinRoom;
+    [SerializeField] private TMP_Text _playerName;
+    [SerializeField] private PlayerData _playerData;
     #endregion
 
     #region Public API
@@ -45,6 +48,8 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public async void StartSession(GameMode gameMode, string sessionName, int sceneIndex)
     {
+        SettingPlayerName();
+
         if (_isSessionStarted) return;
         _isSessionStarted = true;
 
@@ -99,6 +104,28 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
             ActiveRunner.Shutdown();
             Destroy(ActiveRunner.gameObject);
             ActiveRunner = null;
+        }
+    }
+    private void SettingPlayerName()
+    {
+        // 1. Grab the raw text from the input field
+        string rawText = _playerName.text;
+
+        // 2. R.I.P. the invisible TextMeshPro character, then Trim() any normal spaces
+        string cleanedText = rawText.Replace("\u200B", "").Trim();
+
+        // 3. NOW check the clean string!
+        if (string.IsNullOrWhiteSpace(cleanedText))
+        {
+            Debug.Log("The box is actually empty! Assigning random name.");
+
+            // Note: Changed to NameHelper since we made it a static class!
+            _playerData.PlayerName = NameGenerator.GenerateShortName();
+        }
+        else
+        {
+            Debug.Log($"The player typed: {cleanedText}");
+            _playerData.PlayerName = cleanedText;
         }
     }
 

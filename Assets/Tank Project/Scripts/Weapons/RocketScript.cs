@@ -18,10 +18,6 @@ public class RocketScript : NetworkBehaviour
     [SerializeField] private ParticleSystem _explosionParticles;
     [SerializeField] private GameObject _rocketMesh;
 
-    [Header("Explosion Physics")]
-    [SerializeField] private float _knockbackForce = 750f;
-    [SerializeField] private float _upwardsModifier = 2f; // Pops the tank into the air!
-
     #region Private Properties
     public PlayerRef _playerRef;
     public List<LagCompensatedHit> _hits = new();
@@ -105,27 +101,16 @@ public class RocketScript : NetworkBehaviour
                 if (root == null)
                     continue;
 
-                // Skip shooter
                 NetworkObject hitObject =
                     _hits[i].Hitbox.Root.GetBehaviour<NetworkObject>();
 
                 if (hitObject == ShootObject)
                     continue;
 
-                // Explosion force
-                // if (root.TryGetComponent(out Rigidbody targetRigidbody))
-                // {
-                //     Vector3 pushDirection = (targetRigidbody.position - transform.position).normalized;
-
-                //     pushDirection += Vector3.up * _upwardsModifier;
-
-                //     targetRigidbody.AddForce(pushDirection.normalized * _knockbackForce, ForceMode.Impulse);
-                // }
-
                 // Damage
-                if (root.TryGetComponent(out TankHealth tankHealth))
+                if (root.TryGetComponent(out TankData tankHealth))
                 {
-                    tankHealth.TakeDamage(_damageAmout);
+                    tankHealth.TakeDamage(_damageAmout,Object.InputAuthority);
                 }
             }
 
@@ -152,6 +137,14 @@ public class RocketScript : NetworkBehaviour
         {
             _smokeTrail.transform.SetParent(null);
             _smokeTrail.autodestruct = true;
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (HasStateAuthority)
+        {
+            Runner.Despawn(Object);
         }
     }
 

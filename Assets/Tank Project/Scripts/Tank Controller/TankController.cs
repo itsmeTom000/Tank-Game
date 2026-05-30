@@ -1,6 +1,7 @@
 using Fusion;
 using Fusion.Addons.Physics;
 using UnityEngine;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(NetworkRigidbody3D))]
@@ -48,12 +49,16 @@ public class TankController : NetworkBehaviour
     [SerializeField] private ParticleSystem _muzzleFlashParticle;
     [SerializeField] private AudioSource _muzzleSound;
 
+    [Header("UI References")]
+    [SerializeField] private Image reloadFill;
+    [SerializeField] private GameObject _UI;
 
     #endregion
 
     #region Private State Variables
     private float _currentSpeed;
     private bool _isTankGrounded;
+    private TankData _tankData;
     private Vector3 _groundNormal = Vector3.up;
     private CoordinatePanel _coordinatePanel;
     private CameraFollowing _cameraFollowing;
@@ -64,6 +69,7 @@ public class TankController : NetworkBehaviour
     private void Awake()
     {
         _networkRigidbody = GetComponent<NetworkRigidbody3D>();
+        _tankData = GetComponent<TankData>();
     }
 
     private void Update()
@@ -84,6 +90,8 @@ public class TankController : NetworkBehaviour
 
         if (HasInputAuthority)
         {
+            _UI.SetActive(true);
+
             _cameraFollowing = FindAnyObjectByType<CameraFollowing>();
             if (_cameraFollowing != null) _cameraFollowing.SettingTarget(_visualTransform);
 
@@ -103,6 +111,19 @@ public class TankController : NetworkBehaviour
         }
 
         GroundRotation();
+        if (FireCooldown.IsRunning)
+        {
+            float fillProgress = GetCooldownProgress();
+
+            reloadFill.fillAmount = fillProgress;
+
+            reloadFill.color = Color.Lerp(Color.red, Color.yellow, fillProgress);
+        }
+        else
+        {
+            reloadFill.fillAmount = 1f;
+            reloadFill.color = Color.green;
+        }
     }
 
     public override void FixedUpdateNetwork()
@@ -119,7 +140,7 @@ public class TankController : NetworkBehaviour
             _tankInputs.SettingGroundCheck(_isTankGrounded);
         }
 
-        if (CachedInput._isGrounded)
+        if (CachedInput._isGrounded && !_tankData.IsDead)
         {
             _currentSpeed = Mathf.Lerp(_currentSpeed, CachedInput._isBoostActivated ? _boostSpeed : _moveSpeed, _accelerationRate * Runner.DeltaTime);
             MovingTank(CachedInput._moveInput, CachedInput._isGrounded);
@@ -150,7 +171,7 @@ public class TankController : NetworkBehaviour
         if (!_isTankGrounded)
         {
             _networkRigidbody.Rigidbody.linearVelocity = new Vector3(_networkRigidbody.Rigidbody.linearVelocity.x, _networkRigidbody.Rigidbody.linearVelocity.y, _networkRigidbody.Rigidbody.linearVelocity.z);
-            // _networkRigidbody.Rigidbody.AddForce(Vector3.down * _extraGravity, ForceMode.Acceleration);
+            _networkRigidbody.Rigidbody.AddForce(Vector3.down * _extraGravity, ForceMode.Acceleration);
         }
         else
         {
@@ -265,6 +286,22 @@ public class TankController : NetworkBehaviour
         }
     }
     #endregion
+
+    public float GetCooldownProgress()
+    {
+        // 1. Get the remaining time in seconds. 
+        // The ?? 0f handles the nullable float if the timer is not running/expired.
+        float remainingTime = FireCooldown.RemainingTime(Runner) ?? 0f;
+
+        // 2. Divide by your total cooldown duration to get a 1.0 -> 0.0 value.
+        // Clamp01 ensures it never drops below 0 or goes above 1.
+        float normalizedRemaining = Mathf.Clamp01(remainingTime / _fireCoolDownTime);
+
+        // 3. Invert it if you want 0.0 to represent "just fired" and 1.0 to represent "ready"
+        float normalizedProgress = 1f - normalizedRemaining;
+
+        return normalizedProgress;
+    }
 
     #region RPC
     [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)]
