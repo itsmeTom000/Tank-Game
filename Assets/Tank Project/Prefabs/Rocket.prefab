@@ -100,7 +100,7 @@ MonoBehaviour:
   _launchForce: 70
   _lifeTime: 5
   _damageAmout: 15
-  _damageRadious: 10
+  _damageRadious: 3
   _collisionLayer:
     serializedVersion: 2
     m_Bits: 128
@@ -108,6 +108,8 @@ MonoBehaviour:
   _smokeTrail: {fileID: 7282585407037098795}
   _explosionParticles: {fileID: 2433282508523890284, guid: 3ef3ae421f71c5c4e97fe12dc2fc6312, type: 3}
   _rocketMesh: {fileID: 772106208468992944}
+  _knockbackForce: 750
+  _upwardsModifier: 0.5
 --- !u!114 &5196958104057561130
 MonoBehaviour:
   m_ObjectHideFlags: 0

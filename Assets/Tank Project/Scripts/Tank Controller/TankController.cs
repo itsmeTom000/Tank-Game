@@ -47,6 +47,8 @@ public class TankController : NetworkBehaviour
     [Header("Muzzle Particle")]
     [SerializeField] private ParticleSystem _muzzleFlashParticle;
     [SerializeField] private AudioSource _muzzleSound;
+
+
     #endregion
 
     #region Private State Variables
@@ -74,6 +76,7 @@ public class TankController : NetworkBehaviour
     public override void Spawned()
     {
         Runner.SetIsSimulated(Object, true);
+
         if (HasStateAuthority)
         {
             ColorIndex = Random.Range(0, _tankColors.Length);
@@ -119,14 +122,13 @@ public class TankController : NetworkBehaviour
         if (CachedInput._isGrounded)
         {
             _currentSpeed = Mathf.Lerp(_currentSpeed, CachedInput._isBoostActivated ? _boostSpeed : _moveSpeed, _accelerationRate * Runner.DeltaTime);
+            MovingTank(CachedInput._moveInput, CachedInput._isGrounded);
+            RotatingTank(CachedInput._moveInput);
         }
         else
         {
             _currentSpeed = Mathf.Lerp(_currentSpeed, 0f, _accelerationRate * Runner.DeltaTime);
         }
-
-        MovingTank(CachedInput._moveInput, CachedInput._isGrounded);
-        RotatingTank(CachedInput._moveInput);
 
         if (CachedInput._buttons.WasPressed(PreviousButtons, TankButtons.ResetPosition) && CachedInput._isGrounded)
             ResettingTankPosition();
@@ -141,14 +143,14 @@ public class TankController : NetworkBehaviour
     #region Movement & Physics Logic
     private void MovingTank(Vector3 moveInput, bool _isTankGrounded)
     {
-        Vector3 slopeForward = Vector3.ProjectOnPlane(transform.forward, _groundNormal).normalized;
+        Vector3 slopeForward = Vector3.ProjectOnPlane(_visualTransform.forward, _groundNormal).normalized;
 
         Vector3 _velocity = _currentSpeed * moveInput.z * slopeForward;
 
         if (!_isTankGrounded)
         {
             _networkRigidbody.Rigidbody.linearVelocity = new Vector3(_networkRigidbody.Rigidbody.linearVelocity.x, _networkRigidbody.Rigidbody.linearVelocity.y, _networkRigidbody.Rigidbody.linearVelocity.z);
-            _networkRigidbody.Rigidbody.AddForce(Vector3.down * _extraGravity, ForceMode.Acceleration);
+            // _networkRigidbody.Rigidbody.AddForce(Vector3.down * _extraGravity, ForceMode.Acceleration);
         }
         else
         {
@@ -200,7 +202,7 @@ public class TankController : NetworkBehaviour
             Object.InputAuthority,
             (runner, spawnedObj) =>
             {
-                spawnedObj.GetComponent<RocketScript>().ShootRocket(_networkRigidbody.Rigidbody.linearVelocity, Object.InputAuthority);
+                spawnedObj.GetComponent<RocketScript>().ShootRocket(_networkRigidbody.Rigidbody.linearVelocity, Object.InputAuthority, Object);
             }
         );
 

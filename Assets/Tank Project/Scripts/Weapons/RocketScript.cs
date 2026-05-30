@@ -5,8 +5,6 @@ using UnityEngine;
 
 public class RocketScript : NetworkBehaviour
 {
-    [Networked] private TickTimer DespawnTimer { get; set; }
-
     [Header("Rocket Stats")]
     [SerializeField] private float _launchForce = 50f;
     [SerializeField] private float _lifeTime = 2.5f;
@@ -20,6 +18,10 @@ public class RocketScript : NetworkBehaviour
     [SerializeField] private ParticleSystem _explosionParticles;
     [SerializeField] private GameObject _rocketMesh;
 
+    [Header("Explosion Physics")]
+    [SerializeField] private float _knockbackForce = 750f;
+    [SerializeField] private float _upwardsModifier = 2f; // Pops the tank into the air!
+
     #region Private Properties
     public PlayerRef _playerRef;
     public List<LagCompensatedHit> _hits = new();
@@ -27,71 +29,114 @@ public class RocketScript : NetworkBehaviour
 
     #region Private Properties
     private Vector3 InheritedVelocity { get; set; }
+    private NetworkObject ShootObject;
+    private TickTimer _despawnTimer;
     #endregion
 
     public override void Spawned()
     {
-        base.Spawned();
+        if (HasStateAuthority)
+        {
+            _despawnTimer = TickTimer.CreateFromSeconds(Runner, _lifeTime);
+        }
         Runner.SetIsSimulated(Object, true);
-
         if (_rocketMesh != null) _rocketMesh.SetActive(true);
         if (_smokeTrail != null) _smokeTrail.Clear();
     }
 
-    public void ShootRocket(Vector3 shooterVelocity, PlayerRef playerRef)
+    public void ShootRocket(Vector3 shooterVelocity, PlayerRef playerRef, NetworkObject networkObject)
     {
         InheritedVelocity = shooterVelocity;
         _playerRef = playerRef;
+        ShootObject = networkObject;
 
         if (HasStateAuthority)
         {
-            // 1. RESTORED: Actually start the death timer!
-            DespawnTimer = TickTimer.CreateFromSeconds(Runner, _lifeTime);
-
             _networkRigidBody.Rigidbody.AddForce(InheritedVelocity + (transform.forward * _launchForce), ForceMode.VelocityChange);
         }
     }
 
     public override void FixedUpdateNetwork()
     {
-        if (!HasStateAuthority) return;
+        if (!HasStateAuthority)
+            return;
 
-        // 2. RESTORED: Destroy the rocket if it flew for too long and missed everything
-        if (DespawnTimer.Expired(Runner))
+        if (Object == null || !Object.IsValid)
+            return;
+
+        _hits.Clear();
+
+        int hitCount = Runner.LagCompensation.OverlapSphere(
+            transform.position,
+            _damageRadious,
+            _playerRef,
+            _hits,
+            _collisionLayer,
+            HitOptions.IncludePhysX
+        );
+
+        bool isHitValid = false;
+
+        for (int i = 0; i < hitCount; i++)
         {
-            Runner.Despawn(Object);
+            if (_hits[i].Hitbox == null)
+                continue;
+
+            NetworkObject hitObject =
+                _hits[i].Hitbox.Root.GetBehaviour<NetworkObject>();
+
+            // Ignore the tank that fired the rocket
+            if (hitObject == ShootObject)
+                continue;
+
+            isHitValid = true;
+            break;
         }
-    }
 
-    // 3. RESTORED: Only check for damage when we physically hit a wall or a player
-    private void OnCollisionEnter(Collision other)
-    {
-        // Safety lock to prevent double-impact crashes
-        if (Object == null || Object.IsValid == false) return;
-
-        if (HasStateAuthority)
+        if (isHitValid)
         {
-            int hitCount = Runner.LagCompensation.OverlapSphere(
-                transform.position,
-                _damageRadious,
-                _playerRef,
-                _hits,
-                _collisionLayer
-            );
-            // Loop through all hits and deal damage
             for (int i = 0; i < hitCount; i++)
             {
-                Transform root = _hits[i].Hitbox.Root.transform;
-                Debug.Log(root.name);
-                if (root == null) continue;
+                if (_hits[i].Hitbox == null)
+                    continue;
+
+                Transform root = _hits[i].Hitbox.transform.root;
+
+                if (root == null)
+                    continue;
+
+                // Skip shooter
+                NetworkObject hitObject =
+                    _hits[i].Hitbox.Root.GetBehaviour<NetworkObject>();
+
+                if (hitObject == ShootObject)
+                    continue;
+
+                // Explosion force
+                // if (root.TryGetComponent(out Rigidbody targetRigidbody))
+                // {
+                //     Vector3 pushDirection = (targetRigidbody.position - transform.position).normalized;
+
+                //     pushDirection += Vector3.up * _upwardsModifier;
+
+                //     targetRigidbody.AddForce(pushDirection.normalized * _knockbackForce, ForceMode.Impulse);
+                // }
+
+                // Damage
                 if (root.TryGetComponent(out TankHealth tankHealth))
                 {
                     tankHealth.TakeDamage(_damageAmout);
                 }
             }
 
-            // 4. FIXED: Despawn happens exactly ONCE, completely outside the loop!
             Runner.Despawn(Object);
+            return; // IMPORTANT
+        }
+
+        if (_despawnTimer.ExpiredOrNotRunning(Runner))
+        {
+            Runner.Despawn(Object);
+            return; // IMPORTANT
         }
     }
 

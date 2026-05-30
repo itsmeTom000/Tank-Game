@@ -10,7 +10,7 @@ public class TankHealth : NetworkBehaviour
     #region Public Functions
     public void TakeDamage(float _damageAmout)
     {
-        Debug.Log("Damage");
+        Debug.Log("Damage : " + _damageAmout + " Gameobject Name : " + gameObject.name);
         if (_damageAmout > Health)
             Health -= Health;
         else
