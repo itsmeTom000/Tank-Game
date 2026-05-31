@@ -13,6 +13,7 @@ public class TankController : NetworkBehaviour
     [Networked] public NetworkButtons PreviousButtons { get; set; }
     [Networked] public TickTimer FireCooldown { get; set; }
     [Networked] private float TargetTurretAngle { get; set; }
+    [Networked] private float TargetTurretUpAngle { get; set; }
     #endregion 
 
     #region Inspector Components
@@ -22,7 +23,7 @@ public class TankController : NetworkBehaviour
     [SerializeField] private Transform _turrentColider;
     [SerializeField] private Transform _visualTransform;
     [SerializeField] private Transform _bulletSpawnPosition;
-    [SerializeField] private NetworkObject _bulletPrefab;
+    [SerializeField] private NetworkObject _rocketPrefab;
     [SerializeField] private Transform _targetVisual;
     [SerializeField] private TankInputs _tankInputs;
     [SerializeField] private SphereCollider _collider;
@@ -70,7 +71,6 @@ public class TankController : NetworkBehaviour
     private CoordinatePanel _coordinatePanel;
     private CameraFollowing _cameraFollowing;
     private NetworkRigidbody3D _networkRigidbody;
-    private float _targetTurretAngle = 0f;
     #endregion
 
     #region Unity Lifecycle
@@ -85,6 +85,7 @@ public class TankController : NetworkBehaviour
         Cursor.lockState = CursorLockMode.Locked; // Locks it to the dead center
         Cursor.visible = false;
     }
+
     private void Update()
     {
         _coordinatePanel?.SetCoordinates(transform.position);
@@ -107,7 +108,7 @@ public class TankController : NetworkBehaviour
             _UI.SetActive(true);
 
             _cameraFollowing = FindAnyObjectByType<CameraFollowing>();
-            if (_cameraFollowing != null) _cameraFollowing.SettingTarget(_visualTransform);
+            if (_cameraFollowing != null) _cameraFollowing.SettingTarget(_turret);
 
             _coordinatePanel = FindAnyObjectByType<CoordinatePanel>();
             if (_coordinatePanel != null) _coordinatePanel.Open();
@@ -165,7 +166,7 @@ public class TankController : NetworkBehaviour
             _currentSpeed = Mathf.Lerp(_currentSpeed, 0f, _accelerationRate * Runner.DeltaTime);
         }
 
-        RotatingTurret(CachedInput._mouseHorizontalInput);
+        RotatingTurret(CachedInput._mouseHorizontalInput, CachedInput._mouseVerticleInput);
 
         if (CachedInput._buttons.WasPressed(PreviousButtons, TankButtons.ResetPosition) && CachedInput._isGrounded)
             ResettingTankPosition();
@@ -197,19 +198,23 @@ public class TankController : NetworkBehaviour
 
     private void RotatingTank(Vector3 moveInput)
     {
-        float rotationAmount = moveInput.x * _turrentRotationSpeed * Runner.DeltaTime;
+        float rotationAmount = moveInput.x * _rotationSpeed * Runner.DeltaTime;
         Quaternion deltaRotation = Quaternion.Euler(0f, rotationAmount, 0f);
         _networkRigidbody.Rigidbody.MoveRotation(_networkRigidbody.Rigidbody.rotation * deltaRotation);
     }
 
-    private void RotatingTurret(float _mouseHorizontalInput)
+    private void RotatingTurret(float _mouseHorizontalInput, float _mouseVerticleInput)
     {
-        float rotationDelta = _rotationSpeed * _mouseHorizontalInput * Runner.DeltaTime;
+        float rotationDelta = _turrentRotationSpeed * _mouseHorizontalInput * Runner.DeltaTime;
         TargetTurretAngle += rotationDelta;
 
-        TargetTurretAngle = Mathf.Clamp(TargetTurretAngle, -50f, 50f);
+        float uprotationDelta = _turrentRotationSpeed * _mouseVerticleInput * Runner.DeltaTime;
+        TargetTurretUpAngle += uprotationDelta;
 
-        Quaternion targetRotation = Quaternion.Euler(0f, TargetTurretAngle, 0f);
+        // TargetTurretAngle = Mathf.Clamp(TargetTurretAngle, -180f, 190f);
+        TargetTurretUpAngle = Mathf.Clamp(TargetTurretUpAngle, -45f, 45f);
+
+        Quaternion targetRotation = Quaternion.Euler(-TargetTurretUpAngle, TargetTurretAngle, 0f);
 
         _turret.localRotation = Quaternion.Slerp(
             _turret.localRotation,
@@ -255,7 +260,7 @@ public class TankController : NetworkBehaviour
         if (!HasStateAuthority) return;
 
         Runner.Spawn(
-            _bulletPrefab,
+            _rocketPrefab,
             _bulletSpawnPosition.position,
             _bulletSpawnPosition.rotation,
             Object.InputAuthority,
@@ -293,12 +298,11 @@ public class TankController : NetworkBehaviour
         if (isGroundedVisually)
         {
             Vector3 trueForward = transform.forward;
+
             Vector3 projectedForward = Vector3.ProjectOnPlane(trueForward, hit.normal).normalized;
 
-            // 1. Calculate the base rotation hugging the ground
             Quaternion baseTargetRotation = Quaternion.LookRotation(projectedForward, hit.normal);
 
-            // 2. ADD THE JUICE: Calculate fake G-Forces based on input
             float leanAngle = 0f;
             float pitchAngle = 0f;
 
@@ -327,15 +331,10 @@ public class TankController : NetworkBehaviour
 
     public float GetCooldownProgress()
     {
-        // 1. Get the remaining time in seconds. 
-        // The ?? 0f handles the nullable float if the timer is not running/expired.
         float remainingTime = FireCooldown.RemainingTime(Runner) ?? 0f;
 
-        // 2. Divide by your total cooldown duration to get a 1.0 -> 0.0 value.
-        // Clamp01 ensures it never drops below 0 or goes above 1.
         float normalizedRemaining = Mathf.Clamp01(remainingTime / _fireCoolDownTime);
 
-        // 3. Invert it if you want 0.0 to represent "just fired" and 1.0 to represent "ready"
         float normalizedProgress = 1f - normalizedRemaining;
 
         return normalizedProgress;

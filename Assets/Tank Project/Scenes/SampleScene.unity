@@ -1011,11 +1011,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d93491f884e18844ea170a1669a01a7d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollowing
-  _offset: {x: 0, y: 7, z: -15}
+  _offset: {x: 0, y: 3, z: -15}
   _positionSmoothTime: 0.1
   _zoomSpeed: 10
   _minZoomDistance: 5
-  _maxZoomDistance: 35
+  _maxZoomDistance: 20
   _collisionLayers:
     serializedVersion: 2
     m_Bits: 64

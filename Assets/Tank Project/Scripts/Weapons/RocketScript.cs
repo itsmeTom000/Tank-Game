@@ -23,12 +23,12 @@ public class RocketScript : NetworkBehaviour
     [SerializeField] private GameObject _rocketMesh;
 
     #region Private Properties
-    public PlayerRef _playerRef;
-    public List<LagCompensatedHit> _hits = new();
+    private PlayerRef _playerRef;
+    private List<LagCompensatedHit> _hits = new();
     #endregion
 
     #region Private Properties
-    private NetworkObject ShootObject;
+    private NetworkObject _shootNetworkObject;
     private TickTimer _despawnTimer;
     #endregion
 
@@ -47,7 +47,7 @@ public class RocketScript : NetworkBehaviour
     {
         InheritedVelocity = shooterVelocity;
         _playerRef = playerRef;
-        ShootObject = networkObject;
+        _shootNetworkObject = networkObject;
 
         if (HasStateAuthority)
         {
@@ -85,7 +85,7 @@ public class RocketScript : NetworkBehaviour
                 _hits[i].Hitbox.Root.GetBehaviour<NetworkObject>();
 
             // Ignore the tank that fired the rocket
-            if (hitObject == ShootObject)
+            if (hitObject == _shootNetworkObject)
                 continue;
 
             isHitValid = true;
@@ -107,7 +107,7 @@ public class RocketScript : NetworkBehaviour
                 NetworkObject hitObject =
                     _hits[i].Hitbox.Root.GetBehaviour<NetworkObject>();
 
-                if (hitObject == ShootObject)
+                if (hitObject == _shootNetworkObject)
                     continue;
 
                 // Damage

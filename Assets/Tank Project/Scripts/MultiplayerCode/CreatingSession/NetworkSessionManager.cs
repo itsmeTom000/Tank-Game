@@ -75,6 +75,8 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
             GameMode = gameMode,
             SessionName = sessionName,
             Scene = sceneRef,
+            IsOpen = true,
+            IsVisible = true
         };
 
         if (gameMode == GameMode.Host) startGameArgs.SceneManager = ActiveRunner.GetComponent<INetworkSceneManager>();

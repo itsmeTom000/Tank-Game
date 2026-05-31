@@ -19463,16 +19463,16 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3266395432690921864}
   m_LocalRotation: {x: 0.000000037748947, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.2824272}
+  m_LocalPosition: {x: 0, y: 0, z: 0.23988567}
   m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8015960028199251055}
-  m_Father: {fileID: 8009528708486874319}
+  m_Father: {fileID: 2184783410706979227}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.16891223, y: 0.39069897}
+  m_AnchoredPosition: {x: -0.16467029, y: 0.12024313}
   m_SizeDelta: {x: 1, y: 0.3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &6372001705095435070
@@ -19707,7 +19707,6 @@ Transform:
   - {fileID: 7551811630803403431}
   - {fileID: 3315282382129174622}
   - {fileID: 2184783410706979227}
-  - {fileID: 8100811998876010643}
   m_Father: {fileID: 641503150406851321}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &565756046446735661
@@ -19801,6 +19800,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 8100811998876010643}
   - {fileID: 883794521095968121}
   - {fileID: 3542811524324054580}
   m_Father: {fileID: 8009528708486874319}
@@ -19875,7 +19875,6 @@ GameObject:
   - component: {fileID: 883794521095968121}
   - component: {fileID: 1692979565425668564}
   - component: {fileID: 8904524914052337517}
-  - component: {fileID: 6205457429220508420}
   m_Layer: 7
   m_Name: Turent_1
   m_TagString: Untagged
@@ -19958,23 +19957,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &6205457429220508420
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7226282037689070051}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkTransform
-  _stateAuthorityChangeErrorCorrectionDelta: 0
-  SyncScale: 0
-  SyncParent: 0
-  _autoAOIOverride: 1
-  DisableSharedModeInterpolation: 1
 --- !u!1 &8118450113577882828
 GameObject:
   m_ObjectHideFlags: 0
@@ -20298,7 +20280,6 @@ MonoBehaviour:
   - {fileID: 8858483456676244394}
   - {fileID: 8453356744948629644}
   - {fileID: 8686565269016124641}
-  - {fileID: 6205457429220508420}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &1545050735501243217
 MonoBehaviour:
@@ -20337,19 +20318,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TankController
   _bodyMeshRenderer: {fileID: 8762959174395036057}
   _turret: {fileID: 2184783410706979227}
+  _cannon: {fileID: 2184783410706979227}
   _turrentColider: {fileID: 1608239709058862303}
   _visualTransform: {fileID: 641503150406851321}
   _bulletSpawnPosition: {fileID: 4682810064353074870}
-  _bulletPrefab: {fileID: 5196958104057561130, guid: 018d66de5f18181499abf69f92f40ca7, type: 3}
+  _rocketPrefab: {fileID: 5196958104057561130, guid: 018d66de5f18181499abf69f92f40ca7, type: 3}
   _targetVisual: {fileID: 8009528708486874319}
   _tankInputs: {fileID: 1653797578839388966}
   _collider: {fileID: 7959391632252945068}
   _moveSpeed: 30
   _boostSpeed: 60
-  _rotationSpeed: 150
+  _rotationSpeed: 50
   _resetDropDistance: 5
   _accelerationRate: 5
-  _fireCoolDownTime: 2
+  _fireCoolDownTime: 1
   _turnLeanAmount: 5
   _accelerationPitch: -5
   _groundLayerMask:
