@@ -80,19 +80,20 @@ public class TankData : NetworkBehaviour
 
     private void Respawn()
     {
-        // 1. Reset health and status
+        Vector3 newSpawnPosition = Vector3.up * 5f; // Fallback
+
+        _networkRigidbody.Teleport(newSpawnPosition, Quaternion.identity);
+
         CurrentHealth = _maxHealth;
         IsDead = false;
 
         // 2. Ask the GameManager for a random drop zone
-        Vector3 newSpawnPosition = Vector3.up * 5f; // Fallback
         // if (GameManager.Instance != null)
         // {
         //     newSpawnPosition = GameManager.Instance.GetRandomSpawnLocation();
         // }
 
         // 3. Teleport the physics body to the new spot instantly!
-        _networkRigidbody.Teleport(newSpawnPosition, Quaternion.identity);
     }
 
     public override void Render()

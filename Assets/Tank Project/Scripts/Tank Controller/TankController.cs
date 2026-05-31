@@ -17,7 +17,8 @@ public class TankController : NetworkBehaviour
     #region Inspector Components
     [Header("Components")]
     [SerializeField] private MeshRenderer _bodyMeshRenderer;
-    [SerializeField] private Transform _turrent;
+    [SerializeField] private Transform _turret;
+    [SerializeField] private Transform _turrentColider;
     [SerializeField] private Transform _visualTransform;
     [SerializeField] private Transform _bulletSpawnPosition;
     [SerializeField] private NetworkObject _bulletPrefab;
@@ -43,7 +44,6 @@ public class TankController : NetworkBehaviour
     [SerializeField] private LayerMask _groundLayerMask;
     [SerializeField] private float _groundCheckRayDistance = 0.25f;
     [SerializeField] private float _extraGravity = 40f;
-    [SerializeField] private Color[] _tankColors;
 
     [Header("Muzzle Particle")]
     [SerializeField] private ParticleSystem _muzzleFlashParticle;
@@ -51,6 +51,13 @@ public class TankController : NetworkBehaviour
     [Header("UI References")]
     [SerializeField] private Image reloadFill;
     [SerializeField] private GameObject _UI;
+
+    [Header("Turret Settings")]
+    [SerializeField] private float _turrentRotationSpeed = 150f; // How fast the mouse moves the target
+    [SerializeField] private float _turretSmoothness = 5f; //
+
+    [Header("Tank Color")]
+    [SerializeField] private Color[] _tankColors;
 
     #endregion
 
@@ -62,6 +69,7 @@ public class TankController : NetworkBehaviour
     private CoordinatePanel _coordinatePanel;
     private CameraFollowing _cameraFollowing;
     private NetworkRigidbody3D _networkRigidbody;
+    private float _targetTurretAngle = 0f;
     #endregion
 
     #region Unity Lifecycle
@@ -71,6 +79,11 @@ public class TankController : NetworkBehaviour
         _tankData = GetComponent<TankData>();
     }
 
+    private void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked; // Locks it to the dead center
+        Cursor.visible = false;
+    }
     private void Update()
     {
         _coordinatePanel?.SetCoordinates(transform.position);
@@ -151,6 +164,8 @@ public class TankController : NetworkBehaviour
             _currentSpeed = Mathf.Lerp(_currentSpeed, 0f, _accelerationRate * Runner.DeltaTime);
         }
 
+        RotatingTurret(CachedInput._mouseHorizontalInput);
+
         if (CachedInput._buttons.WasPressed(PreviousButtons, TankButtons.ResetPosition) && CachedInput._isGrounded)
             ResettingTankPosition();
 
@@ -181,9 +196,31 @@ public class TankController : NetworkBehaviour
 
     private void RotatingTank(Vector3 moveInput)
     {
-        float rotationAmount = moveInput.x * _rotationSpeed * Runner.DeltaTime;
+        float rotationAmount = moveInput.x * _turrentRotationSpeed * Runner.DeltaTime;
         Quaternion deltaRotation = Quaternion.Euler(0f, rotationAmount, 0f);
         _networkRigidbody.Rigidbody.MoveRotation(_networkRigidbody.Rigidbody.rotation * deltaRotation);
+    }
+
+    private void RotatingTurret(float _mouseHorizontalInput)
+    {
+        float rotationDelta = _rotationSpeed * _mouseHorizontalInput * Runner.DeltaTime;
+        _targetTurretAngle += rotationDelta;
+
+        _targetTurretAngle = Mathf.Clamp(_targetTurretAngle, -50f, 50f);
+
+        Quaternion targetRotation = Quaternion.Euler(0f, _targetTurretAngle, 0f);
+
+        _turret.localRotation = Quaternion.Slerp(
+            _turret.localRotation,
+            targetRotation,
+            _turretSmoothness * Runner.DeltaTime // The speed at which it catches up
+        );
+
+        _turrentColider.localRotation = Quaternion.Slerp(
+            _turret.localRotation,
+            targetRotation,
+            _turretSmoothness * Runner.DeltaTime // The speed at which it catches up
+        );
     }
 
     private void CheckingGroundCheck()
@@ -223,7 +260,7 @@ public class TankController : NetworkBehaviour
             Object.InputAuthority,
             (runner, spawnedObj) =>
             {
-                spawnedObj.GetComponent<RocketScript>().ShootRocket(_networkRigidbody.Rigidbody.linearVelocity, Object.InputAuthority, Object);
+                spawnedObj.GetComponent<RocketScript>().ShootRocket(_networkRigidbody.Rigidbody.linearVelocity + (_turret.forward * _networkRigidbody.Rigidbody.linearVelocity.magnitude), Object.InputAuthority, Object);
             }
         );
 

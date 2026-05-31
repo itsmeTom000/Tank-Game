@@ -14,6 +14,7 @@ public class TankInputs : NetworkBehaviour, INetworkRunnerCallbacks
     #region Private Properties
     private Vector3 MoveInput;
     private Vector3 _turrentDirection;
+    private float _mouseHorizontalInput;
     private bool _isBoostActivated;
     private bool _isTankGrounded;
     #endregion
@@ -28,6 +29,7 @@ public class TankInputs : NetworkBehaviour, INetworkRunnerCallbacks
         MoveInput.z = Input.GetAxis(_moveAxisName);
         MoveInput.x = Input.GetAxis(_turnAxisName);
 
+        _mouseHorizontalInput = Input.GetAxis("Mouse X");
         _isBoostActivated = Input.GetKey(KeyCode.LeftShift);
     }
     #endregion
@@ -57,8 +59,9 @@ public class TankInputs : NetworkBehaviour, INetworkRunnerCallbacks
             _rotatingTurrent = _turrentDirection,
             _isBoostActivated = _isBoostActivated,
             _isGrounded = _isTankGrounded,
+            _mouseHorizontalInput = _mouseHorizontalInput
         };
-        _playerInput._buttons.Set(TankButtons.ResetPosition, Input.GetKey(KeyCode.R));
+        // _playerInput._buttons.Set(TankButtons.ResetPosition, Input.GetKey(KeyCode.R));
         _playerInput._buttons.Set(TankButtons.Shoot, Input.GetButton("Fire1"));
 
         input.Set(_playerInput);
@@ -101,7 +104,8 @@ public struct PlayerInput : INetworkInput
     public Vector3 _moveInput;
     public Vector3 _rotatingTurrent;
     public NetworkBool _isBoostActivated;
-    public bool _isGrounded;
     public NetworkButtons _buttons;
+    public bool _isGrounded;
+    public float _mouseHorizontalInput;
 }
 #endregion
