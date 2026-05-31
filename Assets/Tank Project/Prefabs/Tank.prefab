@@ -20324,7 +20324,6 @@ MonoBehaviour:
   - {r: 1, g: 0.5795378, b: 0, a: 1}
   - {r: 0.5283019, g: 0.5283019, b: 0.5283019, a: 1}
   _muzzleFlashParticle: {fileID: 3172913842699207683}
-  _muzzleSound: {fileID: 0}
   reloadFill: {fileID: 3742829708483514080}
   _UI: {fileID: 3266395432690921864}
 --- !u!114 &1545050735501243217

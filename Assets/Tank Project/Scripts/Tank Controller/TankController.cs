@@ -47,7 +47,6 @@ public class TankController : NetworkBehaviour
 
     [Header("Muzzle Particle")]
     [SerializeField] private ParticleSystem _muzzleFlashParticle;
-    [SerializeField] private AudioSource _muzzleSound;
 
     [Header("UI References")]
     [SerializeField] private Image reloadFill;
@@ -314,6 +313,7 @@ public class TankController : NetworkBehaviour
     {
         if (_muzzleFlashParticle != null)
         {
+            SoundManager.Instance.PlaySound(SoundManager.SoundEffect.TankFire, _bulletSpawnPosition.position);
             _muzzleFlashParticle.Play();
         }
     }

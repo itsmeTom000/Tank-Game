@@ -99,6 +99,8 @@ public class TankData : NetworkBehaviour
     {
         if (IsDead && _tankVisuals.activeSelf)
         {
+            SoundManager.Instance.PlaySound(SoundManager.SoundEffect.RocketExplosion, transform.position);
+            
             _tankVisuals.SetActive(false);
 
             if (_deathExplosion != null)
