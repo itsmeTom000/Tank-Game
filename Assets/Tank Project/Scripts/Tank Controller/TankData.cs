@@ -48,6 +48,7 @@ public class TankData : NetworkBehaviour
     {
         if (IsDead) return;
 
+        Debug.Log("Damage Done : " + damageAmount + " Gameobject : " + gameObject.name);
         CurrentHealth -= damageAmount;
 
         if (CurrentHealth <= 0)
@@ -80,7 +81,7 @@ public class TankData : NetworkBehaviour
 
     private void Respawn()
     {
-        Vector3 newSpawnPosition = Vector3.up * 5f; // Fallback
+        Vector3 newSpawnPosition = transform.position + (Vector3.up * 5f); // Fallback
 
         _networkRigidbody.Teleport(newSpawnPosition, Quaternion.identity);
 
@@ -101,7 +102,7 @@ public class TankData : NetworkBehaviour
         if (IsDead && _tankVisuals.activeSelf)
         {
             SoundManager.Instance.PlaySound(SoundManager.SoundEffect.PlayerDeath, transform.position);
-            
+
             _tankVisuals.SetActive(false);
 
             if (_deathExplosion != null)

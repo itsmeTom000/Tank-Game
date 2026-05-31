@@ -19875,6 +19875,7 @@ GameObject:
   - component: {fileID: 883794521095968121}
   - component: {fileID: 1692979565425668564}
   - component: {fileID: 8904524914052337517}
+  - component: {fileID: 6205457429220508420}
   m_Layer: 7
   m_Name: Turent_1
   m_TagString: Untagged
@@ -19957,6 +19958,23 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &6205457429220508420
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7226282037689070051}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.NetworkTransform
+  _stateAuthorityChangeErrorCorrectionDelta: 0
+  SyncScale: 0
+  SyncParent: 0
+  _autoAOIOverride: 1
+  DisableSharedModeInterpolation: 1
 --- !u!1 &8118450113577882828
 GameObject:
   m_ObjectHideFlags: 0
@@ -20280,6 +20298,7 @@ MonoBehaviour:
   - {fileID: 8858483456676244394}
   - {fileID: 8453356744948629644}
   - {fileID: 8686565269016124641}
+  - {fileID: 6205457429220508420}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &1545050735501243217
 MonoBehaviour:

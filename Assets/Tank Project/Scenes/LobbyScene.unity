@@ -1004,7 +1004,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CreatingSession
   _runnerPrefab: {fileID: 1466838289047076977, guid: 07f86835daf2edf4389ea8fe1d034bfa, type: 3}
-  _defaultSessionName: Demo
+  _defaultSessionName: TankSession
   _gameplaySceneIndex: 1
   _createRoom: {fileID: 1208519582}
   _joinRoom: {fileID: 53440099}

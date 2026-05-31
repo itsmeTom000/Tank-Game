@@ -12,6 +12,7 @@ public class TankController : NetworkBehaviour
     [Networked] private PlayerInput CachedInput { get; set; }
     [Networked] public NetworkButtons PreviousButtons { get; set; }
     [Networked] public TickTimer FireCooldown { get; set; }
+    [Networked] private float TargetTurretAngle { get; set; }
     #endregion 
 
     #region Inspector Components
@@ -204,22 +205,22 @@ public class TankController : NetworkBehaviour
     private void RotatingTurret(float _mouseHorizontalInput)
     {
         float rotationDelta = _rotationSpeed * _mouseHorizontalInput * Runner.DeltaTime;
-        _targetTurretAngle += rotationDelta;
+        TargetTurretAngle += rotationDelta;
 
-        _targetTurretAngle = Mathf.Clamp(_targetTurretAngle, -50f, 50f);
+        TargetTurretAngle = Mathf.Clamp(TargetTurretAngle, -50f, 50f);
 
-        Quaternion targetRotation = Quaternion.Euler(0f, _targetTurretAngle, 0f);
+        Quaternion targetRotation = Quaternion.Euler(0f, TargetTurretAngle, 0f);
 
         _turret.localRotation = Quaternion.Slerp(
             _turret.localRotation,
             targetRotation,
-            _turretSmoothness * Runner.DeltaTime // The speed at which it catches up
+            _turretSmoothness * Runner.DeltaTime
         );
 
         _turrentColider.localRotation = Quaternion.Slerp(
-            _turret.localRotation,
+            _turrentColider.localRotation, // <--- Now uses its own rotation as the starting point
             targetRotation,
-            _turretSmoothness * Runner.DeltaTime // The speed at which it catches up
+            _turretSmoothness * Runner.DeltaTime
         );
     }
 

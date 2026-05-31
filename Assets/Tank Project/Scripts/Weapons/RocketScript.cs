@@ -5,6 +5,10 @@ using UnityEngine;
 
 public class RocketScript : NetworkBehaviour
 {
+    #region Network Properties
+    [Networked] private Vector3 InheritedVelocity { get; set; }
+    #endregion
+
     [Header("Rocket Stats")]
     [SerializeField] private float _launchForce = 50f;
     [SerializeField] private float _lifeTime = 2.5f;
@@ -24,7 +28,6 @@ public class RocketScript : NetworkBehaviour
     #endregion
 
     #region Private Properties
-    private Vector3 InheritedVelocity { get; set; }
     private NetworkObject ShootObject;
     private TickTimer _despawnTimer;
     #endregion
@@ -108,10 +111,10 @@ public class RocketScript : NetworkBehaviour
                     continue;
 
                 // Damage
-                if (root.TryGetComponent(out TankData tankHealth))
-                {
-                    tankHealth.TakeDamage(_damageAmout, Object.InputAuthority);
-                }
+                // if (root.TryGetComponent(out TankData tankHealth))
+                // {
+                //     tankHealth.TakeDamage(_damageAmout, Object.InputAuthority);
+                // }
             }
 
             Runner.Despawn(Object);
@@ -128,7 +131,7 @@ public class RocketScript : NetworkBehaviour
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
         SoundManager.Instance.PlaySound(SoundManager.SoundEffect.RocketExplosion, _rocketMesh.transform.position);
-        
+
         if (_explosionParticles != null)
         {
             ParticleSystem explosion = Instantiate(_explosionParticles, _rocketMesh.transform.position, Quaternion.identity);
@@ -139,6 +142,10 @@ public class RocketScript : NetworkBehaviour
         {
             _smokeTrail.transform.SetParent(null);
             _smokeTrail.autodestruct = true;
+        }
+        if (HasStateAuthority)
+        {
+            HandlingColision();
         }
     }
 
@@ -154,5 +161,46 @@ public class RocketScript : NetworkBehaviour
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, _damageRadious);
+    }
+
+    private void HandlingColision()
+    {
+        _hits.Clear();
+
+        int hitCount = Runner.LagCompensation.OverlapSphere(
+           transform.position,
+           _damageRadious * 3f,
+           _playerRef,
+           _hits,
+           _collisionLayer,
+           HitOptions.IncludePhysX
+       );
+
+        // 1. Create a temporary list to remember which tanks we have already hurt!
+        List<TankData> alreadyDamagedTanks = new();
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            if (_hits[i].Hitbox == null) continue;
+
+            Transform root = _hits[i].Hitbox.transform.root;
+            if (root == null) continue;
+
+            // NetworkObject hitObject = _hits[i].Hitbox.Root.GetBehaviour<NetworkObject>();
+            // if (hitObject == ShootObject) continue;
+
+            // Damage Logic
+            if (root.TryGetComponent(out TankData tankHealth))
+            {
+                // 2. THE FIX: Only deal damage if this tank is NOT in our memory list
+                if (!alreadyDamagedTanks.Contains(tankHealth))
+                {
+                    tankHealth.TakeDamage(_damageAmout, Object.InputAuthority);
+
+                    // 3. Add this tank to the memory list so we don't hurt it again!
+                    alreadyDamagedTanks.Add(tankHealth);
+                }
+            }
+        }
     }
 }
