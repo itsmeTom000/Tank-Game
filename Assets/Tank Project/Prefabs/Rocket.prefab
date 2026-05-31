@@ -100,7 +100,7 @@ MonoBehaviour:
   _launchForce: 70
   _lifeTime: 5
   _damageAmout: 15
-  _damageRadious: 2
+  _damageRadious: 1
   _collisionLayer:
     serializedVersion: 2
     m_Bits: 128

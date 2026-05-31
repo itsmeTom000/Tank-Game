@@ -10,9 +10,10 @@ public class SoundManager : MonoBehaviour
     public enum SoundEffect
     {
         TankFire,
+        PlayerDeath,
         RocketExplosion,
         MetalImpact,
-        PlayerSpawn
+        PlayerSpawn,
     }
 
     [Serializable]
@@ -20,25 +21,28 @@ public class SoundManager : MonoBehaviour
     {
         public SoundEffect sound;
         public AudioClip clip;
-        [Range(0f, 1f)] public float volume; 
+        [Range(0f, 1f)] public float volume;
+        
+        // Your awesome new addition!
+        [Range(0f, 200f)] public float soundRange; 
     }
 
     [Header("Audio Library")]
     [SerializeField] private SoundAudioClip[] _soundAudioClipArray;
 
     [Header("Pool Settings")]
-    [SerializeField] private int _initialPoolSize = 15; // How many sources to spawn at start
-    
+    [SerializeField] private int _initialPoolSize = 15;
+
     // 2. THE POOL
     private List<AudioSource> _audioSourcePool;
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
-        else 
-        { 
-            Destroy(gameObject); 
-            return; 
+        else
+        {
+            Destroy(gameObject);
+            return;
         }
 
         InitializePool();
@@ -49,8 +53,7 @@ public class SoundManager : MonoBehaviour
     private void InitializePool()
     {
         _audioSourcePool = new List<AudioSource>();
-        
-        // Pre-warm the pool so we don't have lag spikes mid-game
+
         for (int i = 0; i < _initialPoolSize; i++)
         {
             CreateNewAudioSource();
@@ -59,16 +62,17 @@ public class SoundManager : MonoBehaviour
 
     private AudioSource CreateNewAudioSource()
     {
-        // Create the object and tuck it neatly under the SoundManager in the hierarchy
         GameObject soundGameObject = new GameObject("PooledAudioSource");
-        soundGameObject.transform.SetParent(transform); 
+        soundGameObject.transform.SetParent(transform);
 
         AudioSource audioSource = soundGameObject.AddComponent<AudioSource>();
 
-        // Pre-configure the 3D settings once, so we don't do it every time a sound plays
-        audioSource.spatialBlend = 1f; 
+        audioSource.spatialBlend = 1f;
         audioSource.rolloffMode = AudioRolloffMode.Linear;
-        audioSource.maxDistance = 50f; 
+        
+        // We REMOVED the hardcoded maxDistance = 50f from here, 
+        // because we will dynamically set it in PlaySound() instead!
+        
         audioSource.playOnAwake = false;
 
         _audioSourcePool.Add(audioSource);
@@ -77,7 +81,6 @@ public class SoundManager : MonoBehaviour
 
     private AudioSource GetAvailableAudioSource()
     {
-        // Look through our pool for an AudioSource that is currently silent
         foreach (AudioSource source in _audioSourcePool)
         {
             if (!source.isPlaying)
@@ -86,9 +89,7 @@ public class SoundManager : MonoBehaviour
             }
         }
 
-        // DYNAMIC EXPANSION: If 15 rockets explode at the exact same millisecond 
-        // and all sources are busy, we safely expand the pool so no sounds are dropped!
-        Debug.LogWarning("[SoundManager] Pool exhausted! Creating a new AudioSource. Consider increasing initial pool size.");
+        Debug.LogWarning("[SoundManager] Pool exhausted! Creating a new AudioSource.");
         return CreateNewAudioSource();
     }
 
@@ -96,7 +97,8 @@ public class SoundManager : MonoBehaviour
 
     public void PlaySound(SoundEffect sound, Vector3 position)
     {
-        AudioClip clipToPlay = GetAudioClip(sound, out float volume);
+        // 1. Grab both the volume AND the range from your helper method
+        AudioClip clipToPlay = GetAudioClip(sound, out float volume, out float maxRange);
 
         if (clipToPlay == null)
         {
@@ -104,34 +106,35 @@ public class SoundManager : MonoBehaviour
             return;
         }
 
-        // 1. Grab a free AudioSource from the pool
         AudioSource source = GetAvailableAudioSource();
-
-        // 2. Move it to the blast site
         source.transform.position = position;
 
-        // 3. Load the data and fire it off!
+        // 2. Apply your dynamic data
         source.clip = clipToPlay;
         source.volume = volume;
+        
+        // 3. THE FIX: Apply the specific range for this exact sound!
+        source.maxDistance = maxRange; 
+        
         source.Play();
-
-        // Notice there is NO Destroy() call anymore! 
-        // When the clip finishes, source.isPlaying becomes false automatically,
-        // making it instantly available for the next explosion.
     }
 
-    private AudioClip GetAudioClip(SoundEffect sound, out float volume)
+    // UPDATED: Now uses two 'out' parameters to return both volume and range
+    private AudioClip GetAudioClip(SoundEffect sound, out float volume, out float maxRange)
     {
         foreach (SoundAudioClip soundAudioClip in _soundAudioClipArray)
         {
             if (soundAudioClip.sound == sound)
             {
                 volume = soundAudioClip.volume;
+                maxRange = soundAudioClip.soundRange; // Grab the range!
+                
                 return soundAudioClip.clip;
             }
         }
-        
+
         volume = 1f;
+        maxRange = 50f; 
         return null;
     }
 }

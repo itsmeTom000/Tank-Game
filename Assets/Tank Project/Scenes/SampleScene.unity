@@ -161,7 +161,6 @@ GameObject:
   - component: {fileID: 250113073}
   - component: {fileID: 250113072}
   - component: {fileID: 250113071}
-  - component: {fileID: 250113070}
   - component: {fileID: 250113074}
   - component: {fileID: 250113075}
   m_Layer: 0
@@ -171,14 +170,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &250113070
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 250113069}
-  m_Enabled: 1
 --- !u!124 &250113071
 Behaviour:
   m_ObjectHideFlags: 0
@@ -313,7 +304,7 @@ MonoBehaviour:
   _positionSmoothTime: 0.1
   _zoomSpeed: 10
   _minZoomDistance: 5
-  _maxZoomDistance: 40
+  _maxZoomDistance: 35
 --- !u!1 &284437224
 GameObject:
   m_ObjectHideFlags: 0
@@ -1098,11 +1089,17 @@ MonoBehaviour:
   _soundAudioClipArray:
   - sound: 0
     clip: {fileID: 8300000, guid: ebbfda3826494714cbd0955c2cc3bb46, type: 3}
-    volume: 0.6
+    volume: 0.3
+    soundRange: 50
   - sound: 1
     clip: {fileID: 8300000, guid: 5114e86e7cfea9043b43e092e19a4aa1, type: 3}
-    volume: 1
-  _initialPoolSize: 8
+    volume: 0.6
+    soundRange: 200
+  - sound: 2
+    clip: {fileID: 8300000, guid: 8b38c413ff88d65489eb80d9a82d9da4, type: 3}
+    volume: 0.3
+    soundRange: 150
+  _initialPoolSize: 20
 --- !u!1 &2107212464
 GameObject:
   m_ObjectHideFlags: 0

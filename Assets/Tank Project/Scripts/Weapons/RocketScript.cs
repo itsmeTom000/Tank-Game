@@ -110,7 +110,7 @@ public class RocketScript : NetworkBehaviour
                 // Damage
                 if (root.TryGetComponent(out TankData tankHealth))
                 {
-                    tankHealth.TakeDamage(_damageAmout,Object.InputAuthority);
+                    tankHealth.TakeDamage(_damageAmout, Object.InputAuthority);
                 }
             }
 
@@ -127,6 +127,8 @@ public class RocketScript : NetworkBehaviour
 
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
+        SoundManager.Instance.PlaySound(SoundManager.SoundEffect.RocketExplosion, _rocketMesh.transform.position);
+        
         if (_explosionParticles != null)
         {
             ParticleSystem explosion = Instantiate(_explosionParticles, _rocketMesh.transform.position, Quaternion.identity);

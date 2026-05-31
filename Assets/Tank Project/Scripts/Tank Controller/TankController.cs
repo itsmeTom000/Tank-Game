@@ -89,6 +89,7 @@ public class TankController : NetworkBehaviour
 
         if (HasInputAuthority)
         {
+            gameObject.AddComponent<AudioListener>();
             _UI.SetActive(true);
 
             _cameraFollowing = FindAnyObjectByType<CameraFollowing>();

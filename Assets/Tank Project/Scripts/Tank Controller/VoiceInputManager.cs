@@ -27,7 +27,7 @@ public class VoiceInputManager : NetworkBehaviour
 
             if (_voiceRecorder != null)
             {
-                _voiceRecorder.RecordingEnabled = false;
+                _voiceRecorder.TransmitEnabled = false;
             }
         }
     }
@@ -42,7 +42,7 @@ public class VoiceInputManager : NetworkBehaviour
             if (Input.GetKeyDown(_pushToTalkKey))
             {
                 _isMicOn = !_isMicOn;
-                _voiceRecorder.RecordingEnabled = _isMicOn;
+                _voiceRecorder.TransmitEnabled = _isMicOn;
             }
 
             _image.SetActive(_isMicOn);
