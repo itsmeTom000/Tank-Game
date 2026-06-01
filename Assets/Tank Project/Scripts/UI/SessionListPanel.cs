@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SessionListPanel : Panel
 {
     #region Inspector Field
+    [SerializeField] private Button _backButton;
     [SerializeField] private Transform _sessionViewParent;
     [SerializeField] private SessionView _sessionViewPrefab;
     #endregion
@@ -31,12 +33,26 @@ public class SessionListPanel : Panel
     {
         base.Open();
         NetworkSessionManager.Instance.UpdatesSessionInfo += SessionListUpdate;
+        _backButton.onClick.AddListener(ButtonFunctionality);
     }
 
     public override void Close()
     {
         base.Close();
         NetworkSessionManager.Instance.UpdatesSessionInfo -= SessionListUpdate;
+        _backButton.onClick.RemoveListener(ButtonFunctionality);
     }
     #endregion
+
+    private void ButtonFunctionality()
+    {
+        Close();
+
+        Panel[] panels = UIManager_2.Instance.GettingPanels();
+        foreach (var panel in panels)
+        {
+            if (panel is HomePanel homePanel)
+                homePanel.Open();
+        }
+    }
 }
