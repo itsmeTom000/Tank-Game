@@ -12,7 +12,7 @@ public class SessionListPanel : Panel
     #region SessionList Update
     private void SessionListUpdate(List<SessionInfo> sessionInfos)
     {
-        foreach (Transform child in transform)
+        foreach (Transform child in _sessionViewParent)
         {
             Destroy(child.gameObject);
         }

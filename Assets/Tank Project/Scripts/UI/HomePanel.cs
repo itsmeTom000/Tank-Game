@@ -14,14 +14,14 @@ public class HomePanel : Panel
     public override void Open()
     {
         base.Open();
-        _createRoomButton.onClick.AddListener(() => NetworkSessionManager.Instance.StartAsHost(_sessionName.ToString()));
+        _createRoomButton.onClick.AddListener(() => NetworkSessionManager.Instance.StartAsHost(_sessionName.text));
         _joinRoomButton.onClick.AddListener(() => OnJoinButtonClick());
     }
 
     public override void Close()
     {
         base.Close();
-        _createRoomButton.onClick.RemoveListener(() => NetworkSessionManager.Instance.StartAsHost(_sessionName.ToString()));
+        _createRoomButton.onClick.RemoveListener(() => NetworkSessionManager.Instance.StartAsHost(_sessionName.text));
         _joinRoomButton.onClick.RemoveListener(() => OnJoinButtonClick());
     }
     #endregion

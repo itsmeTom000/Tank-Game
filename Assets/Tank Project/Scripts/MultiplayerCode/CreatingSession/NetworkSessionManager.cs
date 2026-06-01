@@ -15,7 +15,6 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
 
     #region Inspector References
     [SerializeField] private NetworkRunner _runnerPrefab;
-    [SerializeField] private string _defaultSessionName = "Demo";
     [SerializeField] private string _defaultLobbyName = "TankGame";
     [SerializeField] private int _gameplaySceneIndex = 1;
     [SerializeField] private Button _createRoom;
@@ -57,7 +56,7 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
     public async void StartSession(GameMode gameMode, string sessionName, int sceneIndex)
     {
         SettingPlayerName();
-
+        Debug.Log("Session Name : " + sessionName + " GameMode : " + gameMode);
         if (_isSessionStarted) return;
         _isSessionStarted = true;
 
@@ -78,6 +77,7 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
         {
             GameMode = gameMode,
             SessionName = sessionName,
+            CustomLobbyName = _defaultLobbyName,
             Scene = sceneRef,
             IsOpen = true,
             IsVisible = true,
@@ -94,7 +94,6 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
         {
             Debug.Log("[NetworkSessionManager] Successfully connected to session.");
             OnSessionLifeCycle?.Invoke(Enums.OnSessionLifeCycle.Successfully);
-            ActiveRunner.AddCallbacks(this);
         }
         else
         {
@@ -114,7 +113,7 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
         ActiveRunner.name = "Fusion Network Runner";
         ActiveRunner.ProvideInput = true;
         ActiveRunner.AddCallbacks(this);
-        
+
         if (!ActiveRunner.TryGetComponent(out NetworkSceneManagerDefault _))
         {
             ActiveRunner.gameObject.AddComponent<NetworkSceneManagerDefault>();
