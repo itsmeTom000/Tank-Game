@@ -20165,7 +20165,7 @@ AudioSource:
   MinDistance: 1
   MaxDistance: 20
   Pan2D: 0
-  rolloffMode: 0
+  rolloffMode: 1
   BypassEffects: 0
   BypassListenerEffects: 0
   BypassReverbZones: 0
@@ -20198,7 +20198,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0.65
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -20318,7 +20318,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TankController
   _bodyMeshRenderer: {fileID: 8762959174395036057}
   _turret: {fileID: 2184783410706979227}
-  _cannon: {fileID: 2184783410706979227}
   _turrentColider: {fileID: 1608239709058862303}
   _visualTransform: {fileID: 641503150406851321}
   _bulletSpawnPosition: {fileID: 4682810064353074870}

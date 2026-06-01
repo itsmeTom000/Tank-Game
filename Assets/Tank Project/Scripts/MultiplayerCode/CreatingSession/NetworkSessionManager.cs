@@ -9,9 +9,14 @@ using TMPro;
 
 public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
 {
+    #region Instance
+    public static NetworkSessionManager Instance { get; private set; }
+    #endregion
+
     #region Inspector References
     [SerializeField] private NetworkRunner _runnerPrefab;
     [SerializeField] private string _defaultSessionName = "Demo";
+    [SerializeField] private string _defaultLobbyName = "TankGame";
     [SerializeField] private int _gameplaySceneIndex = 1;
     [SerializeField] private Button _createRoom;
     [SerializeField] private Button _joinRoom;
@@ -25,6 +30,7 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
 
     #region Public Events
     public event Action<Enums.OnSessionLifeCycle> OnSessionLifeCycle;
+    public event Action<List<SessionInfo>> UpdatesSessionInfo;
     #endregion
 
     #region Private Properties
@@ -32,23 +38,21 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
     #endregion
 
     #region Unity Callbacks
-    private void OnEnable()
+    private void Awake()
     {
-        _createRoom.onClick.AddListener(StartAsHost);
-        _joinRoom.onClick.AddListener(StartAsClient);
-    }
-
-    private void OnDisable()
-    {
-        _createRoom.onClick.RemoveListener(StartAsHost);
-        _joinRoom.onClick.RemoveListener(StartAsClient);
+        if (Instance == null)
+        {
+            Instance = this;
+        }
     }
     #endregion
 
     #region Session LifeCycle
-    public void StartAsHost() => StartSession(GameMode.Host, _defaultSessionName, _gameplaySceneIndex);
+    public void StartAsHost(string _sessionName) => StartSession(GameMode.Host, _sessionName, _gameplaySceneIndex);
 
-    public void StartAsClient() => StartSession(GameMode.Client, _defaultSessionName, _gameplaySceneIndex);
+    public void StartAsClient(string _sessionName) => StartSession(GameMode.Client, _sessionName, _gameplaySceneIndex);
+
+    public void JoinSessionLobby() => JoiningLobby();
 
     public async void StartSession(GameMode gameMode, string sessionName, int sceneIndex)
     {
@@ -76,7 +80,8 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
             SessionName = sessionName,
             Scene = sceneRef,
             IsOpen = true,
-            IsVisible = true
+            IsVisible = true,
+            PlayerCount = 20
         };
 
         if (gameMode == GameMode.Host) startGameArgs.SceneManager = ActiveRunner.GetComponent<INetworkSceneManager>();
@@ -105,12 +110,22 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
         CleanupRunner();
 
         ActiveRunner = Instantiate(_runnerPrefab);
+
         ActiveRunner.name = "Fusion Network Runner";
         ActiveRunner.ProvideInput = true;
+        ActiveRunner.AddCallbacks(this);
+        
         if (!ActiveRunner.TryGetComponent(out NetworkSceneManagerDefault _))
         {
             ActiveRunner.gameObject.AddComponent<NetworkSceneManagerDefault>();
         }
+    }
+
+    public async void JoiningLobby()
+    {
+        InitializeNetworkRunner();
+
+        await ActiveRunner.JoinSessionLobby(SessionLobby.Custom, _defaultLobbyName);
     }
 
     private void CleanupRunner()
@@ -125,13 +140,10 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
     }
     private void SettingPlayerName()
     {
-        // 1. Grab the raw text from the input field
         string rawText = _playerName.text;
 
-        // 2. R.I.P. the invisible TextMeshPro character, then Trim() any normal spaces
         string cleanedText = rawText.Replace("\u200B", "").Trim();
 
-        // 3. NOW check the clean string!
         if (string.IsNullOrWhiteSpace(cleanedText))
         {
             Debug.Log("The box is actually empty! Assigning random name.");
@@ -161,7 +173,10 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
     #endregion
 
     #region Matchmaking & Authentication
-    public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList) { }
+    public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList)
+    {
+        UpdatesSessionInfo?.Invoke(sessionList);
+    }
     public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data) { }
     public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
     #endregion

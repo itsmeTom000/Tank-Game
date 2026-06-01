@@ -1513,7 +1513,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 599deaa83d2fc094783ee0e1b343f7e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CoordinatePanel
-  canvas: {fileID: 1964734637407578023}
+  canvas: {fileID: 3379250886217636908}
   _coordinateText: {fileID: 172981527068789005}
 --- !u!124 &7926131853304116197
 Behaviour:
