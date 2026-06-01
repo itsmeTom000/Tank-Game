@@ -8,4 +8,12 @@ public class UIManager : MonoBehaviour
     {
         _coordinatePanel.Close();
     }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            NetworkSessionManager.Instance.ShutDownRunner();
+        }
+    }
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Fusion;
 using Fusion.Sockets;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 
@@ -17,9 +16,6 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField] private NetworkRunner _runnerPrefab;
     [SerializeField] private string _defaultLobbyName = "TankGame";
     [SerializeField] private int _gameplaySceneIndex = 1;
-    [SerializeField] private Button _createRoom;
-    [SerializeField] private Button _joinRoom;
-    [SerializeField] private TMP_Text _playerName;
     [SerializeField] private PlayerData _playerData;
     #endregion
 
@@ -32,6 +28,14 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
     public event Action<List<SessionInfo>> UpdatesSessionInfo;
     #endregion
 
+    #region Public Functions
+    public void ShutDownRunner()
+    {
+        CleanupRunner();
+        SceneManager.LoadScene(0);
+    }
+    #endregion
+
     #region Private Properties
     private bool _isSessionStarted = false;
     #endregion
@@ -42,6 +46,11 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
         }
     }
     #endregion
@@ -55,7 +64,6 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public async void StartSession(GameMode gameMode, string sessionName, int sceneIndex)
     {
-        SettingPlayerName();
         Debug.Log("Session Name : " + sessionName + " GameMode : " + gameMode);
         if (_isSessionStarted) return;
         _isSessionStarted = true;
@@ -71,20 +79,17 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
 
         InitializeNetworkRunner();
 
-        var sceneRef = SceneRef.FromIndex(sceneIndex);
-
         var startGameArgs = new StartGameArgs
         {
             GameMode = gameMode,
             SessionName = sessionName,
             CustomLobbyName = _defaultLobbyName,
-            Scene = sceneRef,
+            SceneManager = ActiveRunner.GetComponent<INetworkSceneManager>(),
+            Scene = gameMode == GameMode.Host ? SceneRef.FromIndex(sceneIndex) : null,
             IsOpen = true,
             IsVisible = true,
             PlayerCount = 20
         };
-
-        if (gameMode == GameMode.Host) startGameArgs.SceneManager = ActiveRunner.GetComponent<INetworkSceneManager>();
 
         Debug.Log($"[NetworkSessionManager] Starting session '{sessionName}' as {gameMode}...");
 
@@ -92,6 +97,7 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
 
         if (result.Ok)
         {
+            _isSessionStarted = false;
             Debug.Log("[NetworkSessionManager] Successfully connected to session.");
             OnSessionLifeCycle?.Invoke(Enums.OnSessionLifeCycle.Successfully);
         }
@@ -135,25 +141,6 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
             ActiveRunner.Shutdown();
             Destroy(ActiveRunner.gameObject);
             ActiveRunner = null;
-        }
-    }
-    private void SettingPlayerName()
-    {
-        string rawText = _playerName.text;
-
-        string cleanedText = rawText.Replace("\u200B", "").Trim();
-
-        if (string.IsNullOrWhiteSpace(cleanedText))
-        {
-            Debug.Log("The box is actually empty! Assigning random name.");
-
-            // Note: Changed to NameHelper since we made it a static class!
-            _playerData.PlayerName = NameGenerator.GenerateShortName();
-        }
-        else
-        {
-            Debug.Log($"The player typed: {cleanedText}");
-            _playerData.PlayerName = cleanedText;
         }
     }
 

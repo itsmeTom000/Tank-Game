@@ -15,6 +15,8 @@ public class UIManager_2 : MonoBehaviour
         {
             Instance = this;
         }
+        Cursor.lockState = CursorLockMode.None; // Locks it to the dead center
+        Cursor.visible = true;
     }
 
 
