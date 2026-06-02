@@ -1089,9 +1089,6 @@ MonoBehaviour:
   _runnerPrefab: {fileID: 1466838289047076977, guid: 07f86835daf2edf4389ea8fe1d034bfa, type: 3}
   _defaultLobbyName: TankGame
   _gameplaySceneIndex: 1
-  _createRoom: {fileID: 1208519582}
-  _joinRoom: {fileID: 53440099}
-  _playerName: {fileID: 1072918057}
   _playerData: {fileID: 11400000, guid: 52a76b805433f784783b6aa850356281, type: 2}
 --- !u!1 &638589372
 GameObject:

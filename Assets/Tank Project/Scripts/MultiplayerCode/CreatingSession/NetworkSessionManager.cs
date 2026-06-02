@@ -4,7 +4,6 @@ using Fusion;
 using Fusion.Sockets;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using TMPro;
 
 public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
 {
@@ -37,7 +36,7 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
     #endregion
 
     #region Private Properties
-    private bool _isSessionStarted = false;
+    public bool _isSessionStarted = false;
     #endregion
 
     #region Unity Callbacks
@@ -103,7 +102,6 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
         }
         else
         {
-            _isSessionStarted = false;
             OnSessionLifeCycle?.Invoke(Enums.OnSessionLifeCycle.Failed);
             Debug.LogError($"[NetworkSessionManager] Failed to start game: {result.ShutdownReason}");
             CleanupRunner();
@@ -141,6 +139,7 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
             ActiveRunner.Shutdown();
             Destroy(ActiveRunner.gameObject);
             ActiveRunner = null;
+            _isSessionStarted = false;
         }
     }
 

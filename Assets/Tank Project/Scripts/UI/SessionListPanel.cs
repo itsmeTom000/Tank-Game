@@ -42,6 +42,14 @@ public class SessionListPanel : Panel
         NetworkSessionManager.Instance.UpdatesSessionInfo -= SessionListUpdate;
         _backButton.onClick.RemoveListener(ButtonFunctionality);
     }
+
+    public void OnDestroy()
+    {
+        if (NetworkSessionManager.Instance != null)
+        {
+            NetworkSessionManager.Instance.UpdatesSessionInfo -= SessionListUpdate;
+        }
+    }
     #endregion
 
     private void ButtonFunctionality()

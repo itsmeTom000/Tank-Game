@@ -29,7 +29,7 @@ public class HomePanel : Panel
 
     private void OnJoinButtonClick()
     {
-        NetworkSessionManager.Instance.JoiningLobby();
+        NetworkSessionManager.Instance.JoinSessionLobby();
         Panel[] panels = UIManager_2.Instance.GettingPanels();
         foreach (Panel panel in panels)
         {
