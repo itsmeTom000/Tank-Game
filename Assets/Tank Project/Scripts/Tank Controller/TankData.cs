@@ -48,7 +48,6 @@ public class TankData : NetworkBehaviour
     {
         if (IsDead) return;
 
-        Debug.Log("Damage Done : " + damageAmount + " Gameobject : " + gameObject.name);
         CurrentHealth -= damageAmount;
 
         if (CurrentHealth <= 0)

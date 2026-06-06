@@ -56,7 +56,7 @@ public class SessionListPanel : Panel
     {
         Close();
 
-        Panel[] panels = UIManager_2.Instance.GettingPanels();
+        Panel[] panels = UIManager.Instance.GettingPanels();
         foreach (var panel in panels)
         {
             if (panel is HomePanel homePanel)

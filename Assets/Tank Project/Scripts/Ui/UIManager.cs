@@ -2,18 +2,59 @@ using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
-    [SerializeField] private CoordinatePanel _coordinatePanel;
+    [SerializeField] private Panel[] panels;
+    public CoordinatePanel _coordinatePanel;
+
+    #region Instance
+    public static UIManager Instance { get; private set; }
+    public Panel[] GettingPanels() => panels;
+    #endregion
+
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+        Cursor.lockState = CursorLockMode.None; // Locks it to the dead center
+        Cursor.visible = true;
+    }
+
+    private void OnEnable()
+    {
+        NetworkSessionManager.Instance.OnSessionLifeCycle += OnSessionJoin;
+    }
+
+    private void OnDisable()
+    {
+        NetworkSessionManager.Instance.OnSessionLifeCycle -= OnSessionJoin;
+    }
 
     private void Start()
     {
-        _coordinatePanel.Close();
+        foreach (Panel panel in panels)
+        {
+            if (panel is HomePanel homePanel)
+                homePanel.Open();
+        }
     }
 
-    private void Update()
+    private void OnSessionJoin(Enums.OnSessionLifeCycle onSessionLifeCycle)
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (onSessionLifeCycle == Enums.OnSessionLifeCycle.Successfully)
         {
-            NetworkSessionManager.Instance.ShutDownRunner();
+            foreach (Panel panel in panels)
+            {
+                panel.Close();
+            }
+
+            _coordinatePanel.Open();
         }
     }
 }

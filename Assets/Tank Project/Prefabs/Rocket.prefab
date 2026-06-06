@@ -97,7 +97,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4e192b7fd4a6c5439e2fd37d23bb98b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RocketScript
-  _launchForce: 80
+  _launchForce: 400
   _lifeTime: 5
   _damageAmout: 10
   _damageRadious: 2.5

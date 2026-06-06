@@ -37,6 +37,8 @@ public class TankController : NetworkBehaviour
     [SerializeField] private float _resetDropDistance = 1f;
     [SerializeField] private float _accelerationRate = 5f; // How fast the engine spools up
     [SerializeField] private float _fireCoolDownTime = 2f;
+    [SerializeField] private float _turrentUpRotationLimit = 15f;
+    [SerializeField] private float _turrentSideRotationLimit = 50f;
 
     [Header("Arcade Juice")]
     [SerializeField] private float _turnLeanAmount = 15f; // How many degrees to tilt
@@ -84,6 +86,8 @@ public class TankController : NetworkBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked; // Locks it to the dead center
         Cursor.visible = false;
+
+        _coordinatePanel = UIManager.Instance._coordinatePanel;
     }
 
     private void Update()
@@ -150,12 +154,14 @@ public class TankController : NetworkBehaviour
 
         CheckingGroundCheck();
 
+        if (_tankData.IsDead) return;
+
         if (_tankInputs != null && HasInputAuthority)
         {
             _tankInputs.SettingGroundCheck(_isTankGrounded);
         }
 
-        if (CachedInput._isGrounded && !_tankData.IsDead)
+        if (CachedInput._isGrounded)
         {
             _currentSpeed = Mathf.Lerp(_currentSpeed, CachedInput._isBoostActivated ? _boostSpeed : _moveSpeed, _accelerationRate * Runner.DeltaTime);
             MovingTank(CachedInput._moveInput, CachedInput._isGrounded);
@@ -211,8 +217,8 @@ public class TankController : NetworkBehaviour
         float uprotationDelta = _turrentRotationSpeed * _mouseVerticleInput * Runner.DeltaTime;
         TargetTurretUpAngle += uprotationDelta;
 
-        // TargetTurretAngle = Mathf.Clamp(TargetTurretAngle, -180f, 190f);
-        TargetTurretUpAngle = Mathf.Clamp(TargetTurretUpAngle, -45f, 45f);
+        TargetTurretAngle = Mathf.Clamp(TargetTurretAngle, -_turrentSideRotationLimit, _turrentSideRotationLimit);
+        TargetTurretUpAngle = Mathf.Clamp(TargetTurretUpAngle, -_turrentUpRotationLimit, _turrentUpRotationLimit);
 
         Quaternion targetRotation = Quaternion.Euler(-TargetTurretUpAngle, TargetTurretAngle, 0f);
 

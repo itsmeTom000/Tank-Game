@@ -20327,10 +20327,12 @@ MonoBehaviour:
   _collider: {fileID: 7959391632252945068}
   _moveSpeed: 30
   _boostSpeed: 60
-  _rotationSpeed: 50
+  _rotationSpeed: 100
   _resetDropDistance: 5
   _accelerationRate: 5
   _fireCoolDownTime: 1
+  _turrentUpRotationLimit: 25
+  _turrentSideRotationLimit: 70
   _turnLeanAmount: 5
   _accelerationPitch: -5
   _groundLayerMask:
