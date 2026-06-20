@@ -858,8 +858,8 @@ MonoBehaviour:
   _offset: {x: 0, y: 3, z: -15}
   _positionSmoothTime: 0.1
   _zoomSpeed: 10
-  _minZoomDistance: 5
-  _maxZoomDistance: 20
+  _minZoomDistance: 1
+  _maxZoomDistance: 2
   _collisionLayers:
     serializedVersion: 2
     m_Bits: 64

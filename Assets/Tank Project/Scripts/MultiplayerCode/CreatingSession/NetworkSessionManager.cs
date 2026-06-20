@@ -177,7 +177,9 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
     #endregion
 
     #region Scene Management
-    public void OnSceneLoadStart(NetworkRunner runner) { }
+    public void OnSceneLoadStart(NetworkRunner runner) { 
+        OnSessionLifeCycle?.Invoke(Enums.OnSessionLifeCycle.OnSceneLoad);
+    }
     public void OnSceneLoadDone(NetworkRunner runner) { }
     #endregion
 

@@ -5,6 +5,16 @@ public class CoordinatePanel : Panel
 {
     [SerializeField] private TMP_Text _coordinateText;
 
+    public override void Open()
+    {
+        Invoke(nameof(OpenPanel), 0.5f);
+    }
+
+    private void OpenPanel()
+    {
+        canvas.SetActive(true);
+    }
+
     public void SetCoordinates(Vector3 position)
     {
         _coordinateText.text =

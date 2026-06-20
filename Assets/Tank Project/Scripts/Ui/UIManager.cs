@@ -47,7 +47,7 @@ public class UIManager : MonoBehaviour
 
     private void OnSessionJoin(Enums.OnSessionLifeCycle onSessionLifeCycle)
     {
-        if (onSessionLifeCycle == Enums.OnSessionLifeCycle.Successfully)
+        if (onSessionLifeCycle == Enums.OnSessionLifeCycle.OnSceneLoad)
         {
             foreach (Panel panel in panels)
             {

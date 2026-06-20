@@ -10,6 +10,7 @@ public static class Enums
         Creating,
         Joining,
         Failed,
-        Successfully
+        Successfully,
+        OnSceneLoad
     }
 }

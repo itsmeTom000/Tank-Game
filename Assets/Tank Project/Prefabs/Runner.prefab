@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 3939164860259020213}
   - component: {fileID: 8887037500298082022}
   - component: {fileID: 4038454089400210133}
+  - component: {fileID: 159200231812715554}
   m_Layer: 0
   m_Name: Runner
   m_TagString: Untagged
@@ -250,3 +251,18 @@ MonoBehaviour:
   HandleDeviceChange: 1
   HandleDeviceChangeIOS: 1
   HandleDeviceChangeAndroid: 1
+--- !u!114 &159200231812715554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3208356695025013502}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9c6080750a33c9d428004642d0e07dd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Fusion.Unity::Fusion.Statistics.FusionStatistics
+  _statsEnabled: 31
+  _canvasAnchor: 1
+  _statsCustomConfig: []
