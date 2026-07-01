@@ -23,10 +23,10 @@ public class TankController : NetworkBehaviour
     [SerializeField] private Transform _turrentColider;
     [SerializeField] private Transform _visualTransform;
     [SerializeField] private Transform _bulletSpawnPosition;
-    [SerializeField] private NetworkObject _rocketPrefab;
     [SerializeField] private Transform _targetVisual;
     [SerializeField] private TankInputs _tankInputs;
     [SerializeField] private SphereCollider _collider;
+    [SerializeField] private HandlingShooting _handlingShooting;
     #endregion
 
     #region Inspector Settings
@@ -86,13 +86,6 @@ public class TankController : NetworkBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked; // Locks it to the dead center
         Cursor.visible = false;
-
-        _coordinatePanel = UIManager.Instance._coordinatePanel;
-    }
-
-    private void Update()
-    {
-        _coordinatePanel?.SetCoordinates(transform.position);
     }
     #endregion
 
@@ -114,7 +107,7 @@ public class TankController : NetworkBehaviour
             _cameraFollowing = FindAnyObjectByType<CameraFollowing>();
             if (_cameraFollowing != null) _cameraFollowing.SettingTarget(_turret);
 
-            _coordinatePanel = FindAnyObjectByType<CoordinatePanel>();
+            _coordinatePanel = UIManager.Instance._coordinatePanel;
             if (_coordinatePanel != null) _coordinatePanel.Open();
         }
 
@@ -143,6 +136,7 @@ public class TankController : NetworkBehaviour
             reloadFill.fillAmount = 1f;
             reloadFill.color = Color.green;
         }
+        _coordinatePanel?.SetCoordinates(transform.position);
     }
 
     public override void FixedUpdateNetwork()
@@ -265,16 +259,7 @@ public class TankController : NetworkBehaviour
 
         if (!HasStateAuthority) return;
 
-        Runner.Spawn(
-            _rocketPrefab,
-            _bulletSpawnPosition.position,
-            _bulletSpawnPosition.rotation,
-            Object.InputAuthority,
-            (runner, spawnedObj) =>
-            {
-                spawnedObj.GetComponent<RocketScript>().ShootRocket(_networkRigidbody.Rigidbody.linearVelocity + (_turret.forward * _networkRigidbody.Rigidbody.linearVelocity.magnitude), Object.InputAuthority, Object);
-            }
-        );
+        _handlingShooting.SpawnNetworkProjectile(_bulletSpawnPosition.position, _bulletSpawnPosition.forward * _networkRigidbody.Rigidbody.linearVelocity.magnitude, Object.InputAuthority, Object);
 
         PlayMuzzleFlash();
         RPC_MuzzleFlash();

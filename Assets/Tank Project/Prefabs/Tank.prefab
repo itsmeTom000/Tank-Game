@@ -20066,6 +20066,7 @@ GameObject:
   - component: {fileID: 8858483456676244394}
   - component: {fileID: 8453356744948629644}
   - component: {fileID: 8686565269016124641}
+  - component: {fileID: 3095552719256940567}
   m_Layer: 7
   m_Name: Tank
   m_TagString: Player
@@ -20278,6 +20279,7 @@ MonoBehaviour:
   - {fileID: 8858483456676244394}
   - {fileID: 8453356744948629644}
   - {fileID: 8686565269016124641}
+  - {fileID: 3095552719256940567}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &1545050735501243217
 MonoBehaviour:
@@ -20319,10 +20321,10 @@ MonoBehaviour:
   _turrentColider: {fileID: 1608239709058862303}
   _visualTransform: {fileID: 641503150406851321}
   _bulletSpawnPosition: {fileID: 4682810064353074870}
-  _rocketPrefab: {fileID: 5196958104057561130, guid: 018d66de5f18181499abf69f92f40ca7, type: 3}
   _targetVisual: {fileID: 8009528708486874319}
   _tankInputs: {fileID: 1653797578839388966}
   _collider: {fileID: 7959391632252945068}
+  _handlingShooting: {fileID: 3095552719256940567}
   _moveSpeed: 30
   _boostSpeed: 60
   _rotationSpeed: 100
@@ -20433,6 +20435,26 @@ MonoBehaviour:
   Hitboxes:
   - {fileID: 180951432092069765}
   - {fileID: 8915283590448194353}
+--- !u!114 &3095552719256940567
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8208673601468754611}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7bc5f18ce3d4db4469659aa409c921c0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HandlingShooting
+  visualPrefab: {fileID: 8758137066078465122, guid: 018d66de5f18181499abf69f92f40ca7, type: 3}
+  _speed: 30
+  _lifetime: 3
+  _damageAmount: 15
+  _damageRadius: 4
+  _hitMask:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!1 &8251037312483851618
 GameObject:
   m_ObjectHideFlags: 0

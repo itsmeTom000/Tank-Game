@@ -430,6 +430,10 @@ MonoBehaviour:
   _zoomSpeed: 10
   _minZoomDistance: 5
   _maxZoomDistance: 35
+  _collisionLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  _cameraRadius: 0.5
 --- !u!1 &3615828200618814453
 GameObject:
   m_ObjectHideFlags: 0
@@ -501,7 +505,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1881866173617066207}
-  - component: {fileID: 3357930214621431078}
   m_Layer: 0
   m_Name: UI_Manager
   m_TagString: Untagged
@@ -524,19 +527,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6089806979271406094}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3357930214621431078
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3764014077264374980}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1c1c4b8a981f0cf48880fcd0aa71aaef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UIManager
-  _coordinatePanel: {fileID: 1313416544566024656}
 --- !u!1 &4630043682694425827
 GameObject:
   m_ObjectHideFlags: 0
