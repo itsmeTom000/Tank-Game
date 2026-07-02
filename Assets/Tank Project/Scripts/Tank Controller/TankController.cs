@@ -259,7 +259,7 @@ public class TankController : NetworkBehaviour
 
         if (!HasStateAuthority) return;
 
-        _handlingShooting.SpawnNetworkProjectile(_bulletSpawnPosition.position, _bulletSpawnPosition.forward * _networkRigidbody.Rigidbody.linearVelocity.magnitude, Object.InputAuthority, Object);
+        _handlingShooting.SpawnNetworkProjectile(_bulletSpawnPosition.position, _bulletSpawnPosition.forward, Object.InputAuthority, Object);
 
         PlayMuzzleFlash();
         RPC_MuzzleFlash();

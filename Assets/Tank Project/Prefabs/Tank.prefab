@@ -20451,7 +20451,7 @@ MonoBehaviour:
   _speed: 30
   _lifetime: 3
   _damageAmount: 15
-  _damageRadius: 4
+  _damageRadius: 2
   _hitMask:
     serializedVersion: 2
     m_Bits: 128

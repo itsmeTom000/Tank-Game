@@ -140,38 +140,37 @@ public class HandlingShooting : NetworkBehaviour
         }
     }
 
-    public override void Render()
+   public override void Render()
     {
         for (int i = 0; i < ProjectilesBuffer.Length; i++)
         {
             var data = ProjectilesBuffer[i];
-            // 1. If bullet is dead on network, kill the visual
+            GameObject visual = visualBullets[i]; // Reference the pooled object
+
+            // 1. Handle Dead Bullets (Hide, don't destroy)
             if (!data.IsAlive)
             {
-                if (visualBullets[i] != null)
+                if (visual != null && visual.activeSelf)
                 {
-                    // Optional: Spawn explosion particle here
-                    Destroy(visualBullets[i]);
+                    visual.SetActive(false); 
                 }
                 continue;
             }
-            float elapsedSeconds = Runner.SimulationTime - (data.FireTick * Runner.DeltaTime);
 
+            // Note: Runner.SimulationRenderTime is slightly smoother than SimulationTime for visual sync
+            float elapsedSeconds = Runner.SimulationTime - (data.FireTick * Runner.DeltaTime);
             if (elapsedSeconds <= 0) continue;
 
             Vector3 trueNetworkPos = data.FirePosition + (data.FireVelocity * elapsedSeconds);
-            if (visualBullets[i] == null)
+
+            // 2. Handle newly fired bullets (Snap to start to prevent streaking)
+            if (!visual.activeSelf)
             {
-                visualBullets[i] = Instantiate(visualPrefab,
-               data.FirePosition,
-                Quaternion.LookRotation(data.FireVelocity));
+                visual.SetActive(true);
+                visual.transform.SetPositionAndRotation(data.FirePosition, Quaternion.LookRotation(data.FireVelocity));
             }
 
-            visualBullets[i].transform.position = Vector3.Lerp(
-            visualBullets[i].transform.position,
-            trueNetworkPos,
-            Time.deltaTime * 15f
-            );
+            visual.transform.SetPositionAndRotation(trueNetworkPos, visual.transform.rotation);
         }
     }
     #endregion
