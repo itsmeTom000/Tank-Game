@@ -140,7 +140,7 @@ public class HandlingShooting : NetworkBehaviour
         }
     }
 
-   public override void Render()
+    public override void Render()
     {
         for (int i = 0; i < ProjectilesBuffer.Length; i++)
         {
@@ -152,25 +152,30 @@ public class HandlingShooting : NetworkBehaviour
             {
                 if (visual != null && visual.activeSelf)
                 {
-                    visual.SetActive(false); 
+                    visual.SetActive(false);
                 }
                 continue;
             }
 
-            // Note: Runner.SimulationRenderTime is slightly smoother than SimulationTime for visual sync
-            float elapsedSeconds = Runner.SimulationTime - (data.FireTick * Runner.DeltaTime);
+            float renderTime = HasStateAuthority ? Runner.LocalRenderTime : Runner.RemoteRenderTime;
+
+            float elapsedSeconds = renderTime - (data.FireTick * Runner.DeltaTime);
+
             if (elapsedSeconds <= 0) continue;
 
             Vector3 trueNetworkPos = data.FirePosition + (data.FireVelocity * elapsedSeconds);
 
-            // 2. Handle newly fired bullets (Snap to start to prevent streaking)
             if (!visual.activeSelf)
             {
+                // visual.transform.SetPositionAndRotation(data.FirePosition, Quaternion.LookRotation(data.FireVelocity));
+                visual.transform.position = data.FirePosition;
+                if (!visual.transform.position.Equals(data.FirePosition))
+                    continue; // Wait until the visual is correctly positioned before activating
                 visual.SetActive(true);
-                visual.transform.SetPositionAndRotation(data.FirePosition, Quaternion.LookRotation(data.FireVelocity));
             }
 
             visual.transform.SetPositionAndRotation(trueNetworkPos, visual.transform.rotation);
+            // visual.transform.SetPositionAndRotation(Vector3.MoveTowards(visual.transform.position, trueNetworkPos, 0.5f), visual.transform.rotation);
         }
     }
     #endregion

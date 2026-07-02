@@ -20448,10 +20448,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HandlingShooting
   visualPrefab: {fileID: 8758137066078465122, guid: 018d66de5f18181499abf69f92f40ca7, type: 3}
-  _speed: 30
-  _lifetime: 3
-  _damageAmount: 15
-  _damageRadius: 2
+  _speed: 40
+  _lifetime: 5
+  _damageAmount: 10
+  _damageRadius: 0.5
   _hitMask:
     serializedVersion: 2
     m_Bits: 128
