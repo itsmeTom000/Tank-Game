@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class SoundManager : MonoBehaviour
 {
-    // 1. THE SINGLETON
     public static SoundManager Instance { get; private set; }
 
     public enum SoundEffect
@@ -21,10 +20,26 @@ public class SoundManager : MonoBehaviour
     {
         public SoundEffect sound;
         public AudioClip clip;
-        [Range(0f, 1f)] public float volume;
-        
-        // Your awesome new addition!
-        [Range(0f, 200f)] public float soundRange; 
+
+        [Header("General")]
+        [Range(0f, 1f)]
+        public float volume;
+
+        [Header("3D Audio")]
+        [Range(0f, 50f)]
+        public float minDistance;
+
+        [Range(1f, 300f)]
+        public float maxDistance;
+
+        [Range(0, 256)]
+        public int priority;
+
+        public AudioRolloffMode rolloffMode;
+
+        [Header("Optional")]
+        [Range(0.5f, 2f)]
+        public float pitch;
     }
 
     [Header("Audio Library")]
@@ -33,27 +48,25 @@ public class SoundManager : MonoBehaviour
     [Header("Pool Settings")]
     [SerializeField] private int _initialPoolSize = 15;
 
-    // 2. THE POOL
-    private List<AudioSource> _audioSourcePool;
+    private readonly List<AudioSource> _audioSourcePool = new();
 
     private void Awake()
     {
-        if (Instance == null) Instance = this;
-        else
+        if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
 
+        Instance = this;
+
         InitializePool();
     }
 
-    // --- POOLING LOGIC ---
+    #region Pool
 
     private void InitializePool()
     {
-        _audioSourcePool = new List<AudioSource>();
-
         for (int i = 0; i < _initialPoolSize; i++)
         {
             CreateNewAudioSource();
@@ -62,21 +75,19 @@ public class SoundManager : MonoBehaviour
 
     private AudioSource CreateNewAudioSource()
     {
-        GameObject soundGameObject = new GameObject("PooledAudioSource");
-        soundGameObject.transform.SetParent(transform);
+        GameObject go = new GameObject("PooledAudioSource");
+        go.transform.SetParent(transform);
 
-        AudioSource audioSource = soundGameObject.AddComponent<AudioSource>();
+        AudioSource source = go.AddComponent<AudioSource>();
 
-        audioSource.spatialBlend = 1f;
-        audioSource.rolloffMode = AudioRolloffMode.Linear;
-        
-        // We REMOVED the hardcoded maxDistance = 50f from here, 
-        // because we will dynamically set it in PlaySound() instead!
-        
-        audioSource.playOnAwake = false;
+        source.playOnAwake = false;
+        source.spatialBlend = 1f;
+        source.dopplerLevel = 0f;
+        source.spread = 0f;
 
-        _audioSourcePool.Add(audioSource);
-        return audioSource;
+        _audioSourcePool.Add(source);
+
+        return source;
     }
 
     private AudioSource GetAvailableAudioSource()
@@ -84,57 +95,61 @@ public class SoundManager : MonoBehaviour
         foreach (AudioSource source in _audioSourcePool)
         {
             if (!source.isPlaying)
-            {
                 return source;
-            }
         }
 
-        Debug.LogWarning("[SoundManager] Pool exhausted! Creating a new AudioSource.");
+        Debug.LogWarning("Sound pool exhausted. Creating another AudioSource.");
+
         return CreateNewAudioSource();
     }
 
-    // --- PLAYBACK LOGIC ---
+    #endregion
+
+    #region Public API
 
     public void PlaySound(SoundEffect sound, Vector3 position)
     {
-        // 1. Grab both the volume AND the range from your helper method
-        AudioClip clipToPlay = GetAudioClip(sound, out float volume, out float maxRange);
-
-        if (clipToPlay == null)
+        if (!TryGetSound(sound, out SoundAudioClip soundData))
         {
-            Debug.LogError($"[SoundManager] Missing audio clip for {sound}!");
+            Debug.LogError($"Missing sound configuration for {sound}");
             return;
         }
 
         AudioSource source = GetAvailableAudioSource();
+
         source.transform.position = position;
 
-        // 2. Apply your dynamic data
-        source.clip = clipToPlay;
-        source.volume = volume;
-        
-        // 3. THE FIX: Apply the specific range for this exact sound!
-        source.maxDistance = maxRange; 
-        
+        source.clip = soundData.clip;
+        source.volume = soundData.volume;
+        source.pitch = soundData.pitch;
+
+        source.priority = soundData.priority;
+
+        source.rolloffMode = soundData.rolloffMode;
+        source.minDistance = soundData.minDistance;
+        source.maxDistance = soundData.maxDistance;
+
         source.Play();
     }
 
-    // UPDATED: Now uses two 'out' parameters to return both volume and range
-    private AudioClip GetAudioClip(SoundEffect sound, out float volume, out float maxRange)
+    #endregion
+
+    #region Helpers
+
+    private bool TryGetSound(SoundEffect sound, out SoundAudioClip soundData)
     {
-        foreach (SoundAudioClip soundAudioClip in _soundAudioClipArray)
+        foreach (SoundAudioClip s in _soundAudioClipArray)
         {
-            if (soundAudioClip.sound == sound)
+            if (s.sound == sound)
             {
-                volume = soundAudioClip.volume;
-                maxRange = soundAudioClip.soundRange; // Grab the range!
-                
-                return soundAudioClip.clip;
+                soundData = s;
+                return true;
             }
         }
 
-        volume = 1f;
-        maxRange = 50f; 
-        return null;
+        soundData = default;
+        return false;
     }
+
+    #endregion
 }

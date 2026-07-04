@@ -152,6 +152,7 @@ public class HandlingShooting : NetworkBehaviour
             {
                 if (visual != null && visual.activeSelf)
                 {
+                    SoundManager.Instance.PlaySound(SoundManager.SoundEffect.RocketExplosion, visual.transform.position);
                     visual.SetActive(false);
                 }
                 continue;
@@ -175,7 +176,6 @@ public class HandlingShooting : NetworkBehaviour
             }
 
             visual.transform.SetPositionAndRotation(trueNetworkPos, visual.transform.rotation);
-            // visual.transform.SetPositionAndRotation(Vector3.MoveTowards(visual.transform.position, trueNetworkPos, 0.5f), visual.transform.rotation);
         }
     }
     #endregion

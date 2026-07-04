@@ -20159,12 +20159,12 @@ AudioSource:
   Mute: 0
   Spatialize: 0
   SpatializePostEffects: 0
-  Priority: 80
-  DopplerLevel: 1
-  MinDistance: 0.1
-  MaxDistance: 5
+  Priority: 10
+  DopplerLevel: 0
+  MinDistance: 4
+  MaxDistance: 25
   Pan2D: 0
-  rolloffMode: 1
+  rolloffMode: 0
   BypassEffects: 0
   BypassListenerEffects: 0
   BypassReverbZones: 0
@@ -20325,9 +20325,10 @@ MonoBehaviour:
   _tankInputs: {fileID: 1653797578839388966}
   _collider: {fileID: 7959391632252945068}
   _handlingShooting: {fileID: 3095552719256940567}
-  _moveSpeed: 30
-  _boostSpeed: 60
+  _moveForce: 30
+  _boostForce: 60
   _rotationSpeed: 100
+  _rotationSmoothness: 0.15
   _resetDropDistance: 5
   _accelerationRate: 5
   _fireCoolDownTime: 1
@@ -20335,16 +20336,18 @@ MonoBehaviour:
   _turrentSideRotationLimit: 70
   _turnLeanAmount: 5
   _accelerationPitch: -5
+  _brakingPitch: 8
+  _recoilForce: 3
   _groundLayerMask:
     serializedVersion: 2
     m_Bits: 64
   _groundCheckRayDistance: 0.3
-  _extraGravity: 30
+  _extraGravity: 10
   _muzzleFlashParticle: {fileID: 3172913842699207683}
   reloadFill: {fileID: 3742829708483514080}
   _UI: {fileID: 3266395432690921864}
   _turrentRotationSpeed: 300
-  _turretSmoothness: 5
+  _turretSmoothness: 6
   _tankColors:
   - {r: 0, g: 0, b: 0, a: 1}
   - {r: 1, g: 0, b: 0, a: 1}
@@ -20429,7 +20432,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Fusion.Runtime.dll::Fusion.HitboxRoot
   Config: 3
-  BroadRadius: 0.45
+  BroadRadius: 0.3
   Offset: {x: 0, y: 0.15, z: 0}
   GizmosColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   Hitboxes:
@@ -20448,10 +20451,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HandlingShooting
   visualPrefab: {fileID: 8758137066078465122, guid: 018d66de5f18181499abf69f92f40ca7, type: 3}
-  _speed: 40
-  _lifetime: 5
+  _speed: 30
+  _lifetime: 10
   _damageAmount: 10
-  _damageRadius: 0.5
+  _damageRadius: 0.2
   _hitMask:
     serializedVersion: 2
     m_Bits: 128

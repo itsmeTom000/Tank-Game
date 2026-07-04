@@ -933,7 +933,6 @@ MonoBehaviour:
   - {fileID: 4206736125460495831}
   - {fileID: 2328859384450527980}
   - {fileID: 8322021474992288592}
-  _uiPoint: {fileID: 0}
   _playerView: {fileID: 4288494773554072153, guid: f6f50406e7fc6b643adcdf4144001dc3, type: 3}
 --- !u!1 &3747336694647894378
 GameObject:
@@ -1323,16 +1322,28 @@ MonoBehaviour:
   _soundAudioClipArray:
   - sound: 0
     clip: {fileID: 8300000, guid: ebbfda3826494714cbd0955c2cc3bb46, type: 3}
-    volume: 0.3
-    soundRange: 50
-  - sound: 1
-    clip: {fileID: 8300000, guid: 5114e86e7cfea9043b43e092e19a4aa1, type: 3}
-    volume: 0.6
-    soundRange: 200
+    volume: 0.45
+    minDistance: 8
+    maxDistance: 60
+    priority: 30
+    rolloffMode: 0
+    pitch: 1
   - sound: 2
     clip: {fileID: 8300000, guid: 8b38c413ff88d65489eb80d9a82d9da4, type: 3}
-    volume: 0.3
-    soundRange: 150
+    volume: 0.65
+    minDistance: 10
+    maxDistance: 90
+    priority: 20
+    rolloffMode: 0
+    pitch: 0.99955
+  - sound: 1
+    clip: {fileID: 8300000, guid: 5114e86e7cfea9043b43e092e19a4aa1, type: 3}
+    volume: 0.8
+    minDistance: 12
+    maxDistance: 120
+    priority: 15
+    rolloffMode: 0
+    pitch: 1
   _initialPoolSize: 20
 --- !u!1 &9041295507742102996
 GameObject:

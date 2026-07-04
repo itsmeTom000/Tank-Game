@@ -31,18 +31,21 @@ public class TankController : NetworkBehaviour
 
     #region Inspector Settings
     [Header("Movement Stats")]
-    [SerializeField] private float _moveSpeed = 5f;
-    [SerializeField] private float _boostSpeed = 10f;
+    [SerializeField] private float _moveForce = 50f; // Changed to Force
+    [SerializeField] private float _boostForce = 100f; // Changed to Force
     [SerializeField] private float _rotationSpeed = 100f;
+    [SerializeField] private float _rotationSmoothness = 0.15f; // For heavy drifting feel
     [SerializeField] private float _resetDropDistance = 1f;
-    [SerializeField] private float _accelerationRate = 5f; // How fast the engine spools up
+    [SerializeField] private float _accelerationRate = 5f;
     [SerializeField] private float _fireCoolDownTime = 2f;
     [SerializeField] private float _turrentUpRotationLimit = 15f;
     [SerializeField] private float _turrentSideRotationLimit = 50f;
 
     [Header("Arcade Juice")]
-    [SerializeField] private float _turnLeanAmount = 15f; // How many degrees to tilt
-    [SerializeField] private float _accelerationPitch = -5f;
+    [SerializeField] private float _turnLeanAmount = 15f;
+    [SerializeField] private float _accelerationPitch = -10f; // Exaggerated for effect
+    [SerializeField] private float _brakingPitch = 8f; // Nose dive when stopping
+    [SerializeField] private float _recoilForce = 25f; // Kickback when shooting
 
     [Header("Physics Settings")]
     [SerializeField] private LayerMask _groundLayerMask;
@@ -57,16 +60,17 @@ public class TankController : NetworkBehaviour
     [SerializeField] private GameObject _UI;
 
     [Header("Turret Settings")]
-    [SerializeField] private float _turrentRotationSpeed = 150f; // How fast the mouse moves the target
-    [SerializeField] private float _turretSmoothness = 5f; //
+    [SerializeField] private float _turrentRotationSpeed = 150f;
+    [SerializeField] private float _turretSmoothness = 5f;
 
     [Header("Tank Color")]
     [SerializeField] private Color[] _tankColors;
-
     #endregion
 
     #region Private State Variables
-    private float _currentSpeed;
+    private float _currentForce;
+    private float _currentTurnVelocity; // For SmoothDamp turning
+    private float _smoothedTurnInput;
     private bool _isTankGrounded;
     private TankData _tankData;
     private Vector3 _groundNormal = Vector3.up;
@@ -84,7 +88,7 @@ public class TankController : NetworkBehaviour
 
     private void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked; // Locks it to the dead center
+        Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
     #endregion
@@ -123,12 +127,11 @@ public class TankController : NetworkBehaviour
         }
 
         GroundRotation();
+
         if (FireCooldown.IsRunning)
         {
             float fillProgress = GetCooldownProgress();
-
             reloadFill.fillAmount = fillProgress;
-
             reloadFill.color = Color.Lerp(Color.red, Color.yellow, fillProgress);
         }
         else
@@ -136,6 +139,7 @@ public class TankController : NetworkBehaviour
             reloadFill.fillAmount = 1f;
             reloadFill.color = Color.green;
         }
+
         _coordinatePanel?.SetCoordinates(transform.position);
     }
 
@@ -155,51 +159,72 @@ public class TankController : NetworkBehaviour
             _tankInputs.SettingGroundCheck(_isTankGrounded);
         }
 
-        if (CachedInput._isGrounded)
+        // Calculate forces based on state
+        if (_isTankGrounded)
         {
-            _currentSpeed = Mathf.Lerp(_currentSpeed, CachedInput._isBoostActivated ? _boostSpeed : _moveSpeed, _accelerationRate * Runner.DeltaTime);
-            MovingTank(CachedInput._moveInput, CachedInput._isGrounded);
-            RotatingTank(CachedInput._moveInput);
+            _currentForce = Mathf.Lerp(_currentForce, CachedInput._isBoostActivated ? _boostForce : _moveForce, _accelerationRate * Runner.DeltaTime);
         }
         else
         {
-            _currentSpeed = Mathf.Lerp(_currentSpeed, 0f, _accelerationRate * Runner.DeltaTime);
+            // Give minor forward force maintenance in air so you don't lose all speed instantly
+            _currentForce = Mathf.Lerp(_currentForce, (CachedInput._isBoostActivated ? _boostForce : _moveForce) * 0.3f, _accelerationRate * Runner.DeltaTime);
         }
+
+        MovingTank(CachedInput._moveInput);
+        RotatingTank(CachedInput._moveInput);
 
         RotatingTurret(CachedInput._mouseHorizontalInput, CachedInput._mouseVerticleInput);
 
-        if (CachedInput._buttons.WasPressed(PreviousButtons, TankButtons.ResetPosition) && CachedInput._isGrounded)
+        if (CachedInput._buttons.WasPressed(PreviousButtons, TankButtons.ResetPosition) && _isTankGrounded)
             ResettingTankPosition();
 
         if (CachedInput._buttons.WasPressed(PreviousButtons, TankButtons.Shoot))
             ShootRocket();
+        // Inside FixedUpdateNetwork if you map a jump button
+        if (CachedInput._buttons.WasPressed(PreviousButtons, TankButtons.Jump) && _isTankGrounded)
+        {
+            float jumpForce = 12f; // Adjust to your liking
+            _networkRigidbody.Rigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        }
 
         PreviousButtons = CachedInput._buttons;
     }
-    #endregion
 
-    #region Movement & Physics Logic
-    private void MovingTank(Vector3 moveInput, bool _isTankGrounded)
+    private void MovingTank(Vector3 moveInput)
     {
-        Vector3 slopeForward = Vector3.ProjectOnPlane(_visualTransform.forward, _groundNormal).normalized;
-
-        Vector3 _velocity = _currentSpeed * moveInput.z * slopeForward;
-
-        if (!_isTankGrounded)
+        if (_isTankGrounded)
         {
-            _networkRigidbody.Rigidbody.linearVelocity = new Vector3(_networkRigidbody.Rigidbody.linearVelocity.x, _networkRigidbody.Rigidbody.linearVelocity.y, _networkRigidbody.Rigidbody.linearVelocity.z);
-            _networkRigidbody.Rigidbody.AddForce(Vector3.down * _extraGravity, ForceMode.Acceleration);
+            // Ground Movement: Project along the hill slope
+            Vector3 slopeForward = Vector3.ProjectOnPlane(_visualTransform.forward, _groundNormal).normalized;
+            Vector3 moveForce = slopeForward * (_currentForce * moveInput.z);
+
+            // Strong extra gravity ONLY when grounded to keep treads glued on steep slopes safely
+            Vector3 gravityForce = transform.InverseTransformDirection(Vector3.down) * _extraGravity;
+
+            _networkRigidbody.Rigidbody.AddForce(moveForce + gravityForce, ForceMode.Acceleration);
         }
         else
         {
-            _networkRigidbody.Rigidbody.linearVelocity = new Vector3(_velocity.x, _velocity.y - .2f, _velocity.z);
+            // Airborne Movement: Project forward on a flat plane so you can steer/air-control cleanly
+            Vector3 airForward = Vector3.ProjectOnPlane(_visualTransform.forward, Vector3.up).normalized;
+            Vector3 airMoveForce = airForward * (_currentForce * moveInput.z);
+
+            // Normal/Light gravity in air so the tank floats smoothly off ramps
+            Vector3 airGravity = Vector3.down * 9.81f; // Or a slight arcade multiplier like 15f
+
+            _networkRigidbody.Rigidbody.AddForce(airMoveForce + airGravity, ForceMode.Acceleration);
         }
     }
 
     private void RotatingTank(Vector3 moveInput)
     {
-        float rotationAmount = moveInput.x * _rotationSpeed * Runner.DeltaTime;
-        Quaternion deltaRotation = Quaternion.Euler(0f, rotationAmount, 0f);
+        // 2. Rotational Weight / Drift
+        float targetRotation = moveInput.x * _rotationSpeed;
+
+        // Smoothly dampen the rotation input to give the tank a heavy, drifting feel
+        _smoothedTurnInput = Mathf.SmoothDamp(_smoothedTurnInput, targetRotation, ref _currentTurnVelocity, _rotationSmoothness);
+
+        Quaternion deltaRotation = Quaternion.Euler(0f, _smoothedTurnInput * Runner.DeltaTime, 0f);
         _networkRigidbody.Rigidbody.MoveRotation(_networkRigidbody.Rigidbody.rotation * deltaRotation);
     }
 
@@ -223,7 +248,7 @@ public class TankController : NetworkBehaviour
         );
 
         _turrentColider.localRotation = Quaternion.Slerp(
-            _turrentColider.localRotation, // <--- Now uses its own rotation as the starting point
+            _turrentColider.localRotation,
             targetRotation,
             _turretSmoothness * Runner.DeltaTime
         );
@@ -233,15 +258,23 @@ public class TankController : NetworkBehaviour
     {
         float checkRadius = _collider.radius - 0.05f;
 
+        // Slightly increased distance to prevent frame-skipping over rough terrain crests
+        float dynamicCheckDistance = _groundCheckRayDistance;
+        if (_networkRigidbody.Rigidbody.linearVelocity.magnitude > 5f)
+        {
+            dynamicCheckDistance *= 1.5f;
+        }
+
         _isTankGrounded = Physics.SphereCast(
             transform.position,
             checkRadius,
             -transform.up,
             out RaycastHit hit,
-            _groundCheckRayDistance,
+            dynamicCheckDistance,
             _groundLayerMask
         );
-        // Save the normal so our movement math knows the angle of the hill!
+
+        // Fall back to standard flat horizon normal if mid-air
         _groundNormal = _isTankGrounded ? hit.normal : Vector3.up;
     }
 
@@ -256,10 +289,16 @@ public class TankController : NetworkBehaviour
     private void ShootRocket()
     {
         if (FireCooldown.ExpiredOrNotRunning(Runner) == false) return;
-
         if (!HasStateAuthority) return;
 
-        _handlingShooting.SpawnNetworkProjectile(_bulletSpawnPosition.position, _bulletSpawnPosition.forward, Object.InputAuthority, Object);
+        Vector3 bulletVelocity = _bulletSpawnPosition.forward;
+        if (_networkRigidbody.Rigidbody.linearVelocity.magnitude > 0.2f)
+            bulletVelocity *= _networkRigidbody.Rigidbody.linearVelocity.magnitude * 0.2f;
+
+        _handlingShooting.SpawnNetworkProjectile(_bulletSpawnPosition.position, bulletVelocity, Object.InputAuthority, Object);
+
+        // 3. Combat Recoil - Push the tank back!
+        _networkRigidbody.Rigidbody.AddForce(-_bulletSpawnPosition.forward * _recoilForce, ForceMode.Impulse);
 
         PlayMuzzleFlash();
         RPC_MuzzleFlash();
@@ -271,9 +310,7 @@ public class TankController : NetworkBehaviour
     private void SettingTankColor()
     {
         if (_tankColors.Length > 0)
-        {
             _bodyMeshRenderer.material.color = _tankColors[ColorIndex];
-        }
     }
 
     private void GroundRotation()
@@ -289,28 +326,32 @@ public class TankController : NetworkBehaviour
         if (isGroundedVisually)
         {
             Vector3 trueForward = transform.forward;
-
             Vector3 projectedForward = Vector3.ProjectOnPlane(trueForward, hit.normal).normalized;
-
             Quaternion baseTargetRotation = Quaternion.LookRotation(projectedForward, hit.normal);
 
             float leanAngle = 0f;
             float pitchAngle = 0f;
 
-            if (HasInputAuthority) // Only lean based on our own keyboard input
+            if (HasInputAuthority)
             {
-                // Lean left/right based on turning input
+                // Lean left/right
                 leanAngle = -Input.GetAxis("Horizontal") * _turnLeanAmount;
 
-                // Pitch nose up/down based on driving input
-                pitchAngle = Input.GetAxis("Vertical") * _accelerationPitch;
+                // 4. Enhanced Visual Juice - Acceleration Squat & Braking Dive
+                float verticalInput = Input.GetAxis("Vertical");
+                if (verticalInput > 0.1f)
+                {
+                    pitchAngle = verticalInput * _accelerationPitch; // Squat down when gassing it
+                }
+                else if (verticalInput < 0.1f && _networkRigidbody.Rigidbody.linearVelocity.magnitude > 2f)
+                {
+                    pitchAngle = _brakingPitch; // Dive forward when braking
+                }
             }
 
-            // Combine the G-Force tilt with the ground rotation
             Quaternion juiceTilt = Quaternion.Euler(pitchAngle, 0f, leanAngle);
             Quaternion finalRotation = baseTargetRotation * juiceTilt;
 
-            // 3. Smoothly apply it
             _targetVisual.rotation = Quaternion.Lerp(
                 _targetVisual.rotation,
                 finalRotation,
@@ -323,23 +364,21 @@ public class TankController : NetworkBehaviour
     public float GetCooldownProgress()
     {
         float remainingTime = FireCooldown.RemainingTime(Runner) ?? 0f;
-
         float normalizedRemaining = Mathf.Clamp01(remainingTime / _fireCoolDownTime);
-
-        float normalizedProgress = 1f - normalizedRemaining;
-
-        return normalizedProgress;
+        return 1f - normalizedRemaining;
     }
 
     #region RPC
-    [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)]
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     private void RPC_MuzzleFlash()
     {
+        if (HasStateAuthority) return;
         PlayMuzzleFlash();
     }
 
     private void PlayMuzzleFlash()
     {
+        Debug.Log("Playing muzzle flash");
         if (_muzzleFlashParticle != null)
         {
             SoundManager.Instance.PlaySound(SoundManager.SoundEffect.TankFire, _bulletSpawnPosition.position);

@@ -67,7 +67,7 @@ public class TankInputs : NetworkBehaviour, INetworkRunnerCallbacks
         };
         // _playerInput._buttons.Set(TankButtons.ResetPosition, Input.GetKey(KeyCode.R));
         _playerInput._buttons.Set(TankButtons.Shoot, Input.GetButton("Fire1"));
-
+        _playerInput._buttons.Set(TankButtons.Jump, Input.GetButton("Jump"));
         input.Set(_playerInput);
     }
     #endregion
@@ -98,7 +98,8 @@ public class TankInputs : NetworkBehaviour, INetworkRunnerCallbacks
 public enum TankButtons
 {
     ResetPosition,
-    Shoot
+    Shoot,
+    Jump
 }
 #endregion
 
