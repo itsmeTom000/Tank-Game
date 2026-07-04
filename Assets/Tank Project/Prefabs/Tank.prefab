@@ -20330,7 +20330,7 @@ MonoBehaviour:
   _rotationSpeed: 100
   _rotationSmoothness: 0.15
   _resetDropDistance: 5
-  _accelerationRate: 5
+  _accelerationRate: 3
   _fireCoolDownTime: 1
   _turrentUpRotationLimit: 25
   _turrentSideRotationLimit: 70
@@ -20342,7 +20342,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   _groundCheckRayDistance: 0.3
-  _extraGravity: 10
+  _extraGravity: 15
   _muzzleFlashParticle: {fileID: 3172913842699207683}
   reloadFill: {fileID: 3742829708483514080}
   _UI: {fileID: 3266395432690921864}

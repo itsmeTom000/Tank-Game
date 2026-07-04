@@ -74,6 +74,7 @@ public class TankData : NetworkBehaviour
 
         if (IsDead && RespawnTimer.Expired(Runner))
         {
+            RespawnTimer = TickTimer.None;
             Respawn();
         }
     }
@@ -86,14 +87,6 @@ public class TankData : NetworkBehaviour
 
         CurrentHealth = _maxHealth;
         IsDead = false;
-
-        // 2. Ask the GameManager for a random drop zone
-        // if (GameManager.Instance != null)
-        // {
-        //     newSpawnPosition = GameManager.Instance.GetRandomSpawnLocation();
-        // }
-
-        // 3. Teleport the physics body to the new spot instantly!
     }
 
     public override void Render()
