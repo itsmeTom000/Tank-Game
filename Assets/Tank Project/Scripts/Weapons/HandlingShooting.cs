@@ -20,6 +20,7 @@ public class HandlingShooting : NetworkBehaviour
     #endregion
 
     #region Inspector Properties
+    [SerializeField] private ParticleSystem explosionPrefab;
     [SerializeField] private GameObject visualPrefab;
     [SerializeField] private float _speed = 20f;
     [SerializeField] private float _lifetime = 3f;
@@ -153,6 +154,11 @@ public class HandlingShooting : NetworkBehaviour
                 if (visual != null && visual.activeSelf)
                 {
                     SoundManager.Instance.PlaySound(SoundManager.SoundEffect.RocketExplosion, visual.transform.position);
+                    if (explosionPrefab != null)
+                    {
+                        ParticleSystem explosion = Instantiate(explosionPrefab, visual.transform.position, Quaternion.identity);
+                        Destroy(explosion.gameObject, explosion.main.duration);
+                    }
                     visual.SetActive(false);
                 }
                 continue;

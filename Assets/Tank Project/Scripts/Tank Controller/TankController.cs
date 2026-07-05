@@ -8,7 +8,6 @@ using UnityEngine.UI;
 public class TankController : NetworkBehaviour
 {
     #region Networked Properties
-    [Networked] private int ColorIndex { get; set; }
     [Networked] private PlayerInput CachedInput { get; set; }
     [Networked] public NetworkButtons PreviousButtons { get; set; }
     [Networked] public TickTimer FireCooldown { get; set; }
@@ -18,7 +17,6 @@ public class TankController : NetworkBehaviour
 
     #region Inspector Components
     [Header("Components")]
-    [SerializeField] private MeshRenderer _bodyMeshRenderer;
     [SerializeField] private Transform _turret;
     [SerializeField] private Transform _turrentColider;
     [SerializeField] private Transform _visualTransform;
@@ -63,8 +61,9 @@ public class TankController : NetworkBehaviour
     [SerializeField] private float _turrentRotationSpeed = 150f;
     [SerializeField] private float _turretSmoothness = 5f;
 
-    [Header("Tank Color")]
-    [SerializeField] private Color[] _tankColors;
+    [Header("Particle Settings")]
+    [SerializeField] private ParticleSystem[] _flameParticles;
+
     #endregion
 
     #region Private State Variables
@@ -98,11 +97,6 @@ public class TankController : NetworkBehaviour
     {
         Runner.SetIsSimulated(Object, true);
 
-        if (HasStateAuthority)
-        {
-            ColorIndex = Random.Range(0, _tankColors.Length);
-        }
-
         if (HasInputAuthority)
         {
             gameObject.AddComponent<AudioListener>();
@@ -111,11 +105,8 @@ public class TankController : NetworkBehaviour
             _cameraFollowing = FindAnyObjectByType<CameraFollowing>();
             if (_cameraFollowing != null) _cameraFollowing.SettingTarget(_turret);
 
-            _coordinatePanel = UIManager.Instance._coordinatePanel;
-            if (_coordinatePanel != null) _coordinatePanel.Open();
+            _coordinatePanel = UIHandling.Instance.GetPanel<CoordinatePanel>();
         }
-
-        SettingTankColor();
     }
 
     public override void Render()
@@ -139,7 +130,7 @@ public class TankController : NetworkBehaviour
             reloadFill.fillAmount = 1f;
             reloadFill.color = Color.green;
         }
-
+        PlayFlameParticles(_networkRigidbody.Rigidbody.linearVelocity.magnitude);
         _coordinatePanel?.SetCoordinates(transform.position);
     }
 
@@ -210,7 +201,7 @@ public class TankController : NetworkBehaviour
             Vector3 airMoveForce = airForward * (_currentForce * moveInput.z);
 
             // Normal/Light gravity in air so the tank floats smoothly off ramps
-            Vector3 airGravity = Vector3.down * 9.81f; // Or a slight arcade multiplier like 15f
+            Vector3 airGravity = transform.InverseTransformDirection(Vector3.down) * 9.81f; // Or a slight arcade multiplier like 15f
 
             _networkRigidbody.Rigidbody.AddForce(airMoveForce + airGravity, ForceMode.Acceleration);
         }
@@ -307,10 +298,15 @@ public class TankController : NetworkBehaviour
     #endregion
 
     #region Visuals & Polish
-    private void SettingTankColor()
+    private void PlayFlameParticles(float magnitude)
     {
-        if (_tankColors.Length > 0)
-            _bodyMeshRenderer.material.color = _tankColors[ColorIndex];
+        float targetSpeed = Mathf.Clamp(magnitude * 0.1f, 0.5f, 3f);
+
+        foreach (var particle in _flameParticles)
+        {
+            var main = particle.main;
+            main.simulationSpeed = targetSpeed;
+        }
     }
 
     private void GroundRotation()

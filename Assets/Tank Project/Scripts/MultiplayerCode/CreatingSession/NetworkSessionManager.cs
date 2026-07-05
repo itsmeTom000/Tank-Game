@@ -15,7 +15,6 @@ public class NetworkSessionManager : MonoBehaviour, INetworkRunnerCallbacks
     [SerializeField] private NetworkRunner _runnerPrefab;
     [SerializeField] private string _defaultLobbyName = "TankGame";
     [SerializeField] private int _gameplaySceneIndex = 1;
-    [SerializeField] private PlayerData _playerData;
     #endregion
 
     #region Public API

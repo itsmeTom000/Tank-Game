@@ -1,9 +1,8 @@
-using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
 using UnityEngine.UI;
-
-public class SessionListPanel : Panel
+using System.Collections.Generic;
+public class SessionListHandlingPanel : AbstractPanel
 {
     #region Inspector Field
     [SerializeField] private Button _backButton;
@@ -29,17 +28,17 @@ public class SessionListPanel : Panel
     #endregion
 
     #region Panel Callbacks
-    public override void Open()
+    public override void Show()
     {
-        base.Open();
+        base.Show();
         NetworkSessionManager.Instance.UpdatesSessionInfo += SessionListUpdate;
         _backButton.onClick.AddListener(ButtonFunctionality);
     }
 
-    public override void Close()
+    public override void Hide()
     {
-        base.Close();
-        NetworkSessionManager.Instance.UpdatesSessionInfo -= SessionListUpdate;
+        base.Hide();
+        // NetworkSessionManager.Instance.UpdatesSessionInfo -= SessionListUpdate;
         _backButton.onClick.RemoveListener(ButtonFunctionality);
     }
 
@@ -54,13 +53,6 @@ public class SessionListPanel : Panel
 
     private void ButtonFunctionality()
     {
-        Close();
-
-        Panel[] panels = UIManager.Instance.GettingPanels();
-        foreach (var panel in panels)
-        {
-            if (panel is HomePanel homePanel)
-                homePanel.Open();
-        }
+        UIHandling.Instance.Back();
     }
 }

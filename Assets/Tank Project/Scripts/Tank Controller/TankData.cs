@@ -4,20 +4,30 @@ using UnityEngine;
 
 public class TankData : NetworkBehaviour
 {
+    #region Player Data
+    private struct PlayerData : INetworkStruct
+    {
+        public NetworkString<_32> PlayerName;
+        public Color TankColor;
+    }
+    #endregion
+
     #region Network Properties
     [Networked] public float CurrentHealth { get; set; }
     [Networked] public NetworkBool IsDead { get; set; }
     [Networked] private TickTimer RespawnTimer { get; set; }
-    [Networked] public string PlayerName { get; set; }
+    [Networked] public NetworkString<_32> PlayerName { get; set; }
+    [Networked] public Color TankColor { get; set; }
     #endregion
 
     [Header("Health Settings")]
     [SerializeField] private float _maxHealth = 100f;
     [SerializeField] private float _respawnDelay = 3f; // How long they stay a ghost
-    [SerializeField] private PlayerData _playerdata;
+    [SerializeField] private LocalPlayerData _localPlayerData;
 
     [Header("Visuals")]
     [SerializeField] private ParticleSystem _deathExplosion;
+    [SerializeField] private MeshRenderer _tankMeshRenderer;
     [SerializeField] private GameObject _tankVisuals;
 
     #region Private Properties
@@ -36,12 +46,18 @@ public class TankData : NetworkBehaviour
         {
             CurrentHealth = _maxHealth;
             IsDead = false;
-            PlayerName = _playerdata.PlayerName;
         }
-        else
+
+        if (Object.HasInputAuthority)
         {
-            RPC_SettingPlayerData(_playerdata.PlayerName);
+            // Set the player data from the local player data
+            RPC_SettingPlayerData(new PlayerData
+            {
+                PlayerName = _localPlayerData.PlayerName,
+                TankColor = _localPlayerData.TankColor
+            });
         }
+        SettingTankColor();
     }
 
     public void TakeDamage(float damageAmount, PlayerRef damageSource)
@@ -99,7 +115,7 @@ public class TankData : NetworkBehaviour
 
             if (_deathExplosion != null)
             {
-                ParticleSystem explosion = Instantiate(_deathExplosion, transform.position, Quaternion.LookRotation(_tankVisuals.transform.up, _deathExplosion.gameObject.transform.forward));
+                ParticleSystem explosion = Instantiate(_deathExplosion, transform.position, Quaternion.LookRotation(_tankVisuals.transform.forward, _deathExplosion.gameObject.transform.up));
                 Destroy(explosion.gameObject, explosion.main.duration);
             }
         }
@@ -110,11 +126,21 @@ public class TankData : NetworkBehaviour
         }
     }
 
+    private void SettingTankColor()
+    {
+        if (_tankMeshRenderer != null)
+        {
+            _tankMeshRenderer.material.color = TankColor;
+        }
+    }
+
     #region RPC
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    private void RPC_SettingPlayerData(string playerName)
+    private void RPC_SettingPlayerData(PlayerData playerData)
     {
-        PlayerName = playerName;
+        Debug.Log($"[TankData] Setting player data for {playerData.PlayerName} with color {playerData.TankColor}");
+        PlayerName = playerData.PlayerName;
+        TankColor = playerData.TankColor;
     }
     #endregion
 }

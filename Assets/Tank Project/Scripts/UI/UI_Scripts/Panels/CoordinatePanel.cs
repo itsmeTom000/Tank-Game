@@ -1,18 +1,19 @@
 using TMPro;
 using UnityEngine;
 
-public class CoordinatePanel : Panel
+public class CoordinatePanel : AbstractPanel
+
 {
     [SerializeField] private TMP_Text _coordinateText;
 
-    public override void Open()
+    public override void Show()
     {
         Invoke(nameof(OpenPanel), 0.5f);
     }
 
     private void OpenPanel()
     {
-        canvas.SetActive(true);
+        canvas.enabled = true;
     }
 
     public void SetCoordinates(Vector3 position)

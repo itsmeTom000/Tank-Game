@@ -7,22 +7,30 @@ public class PlayerSpawner : NetworkBehaviour, IPlayerJoined, IPlayerLeft
     #region Inspector Fields
     [SerializeField] private NetworkObject _playerPrefab;
     [SerializeField] private Transform[] _spawnPoints;
+    [SerializeField] private GameObject _playerParent;
     [SerializeField] private GameObject _playerView;
     #endregion
 
     #region Player Dictionary
-    private Dictionary<PlayerRef, NetworkObject> _playerList = new();
+    [Networked, Capacity(16),OnChangedRender(nameof(RefreshPlayerViews))]
+    private NetworkDictionary<PlayerRef, NetworkObject> PlayerList => default;
     #endregion
 
+    public override void Spawned()
+    {
+        // 2. Initialize the ChangeDetector
+        RefreshPlayerViews();
+    }
+
     #region Player Join / Left Callbacks
-    public void PlayerJoined(PlayerRef _playerRef)
+    public void PlayerJoined(PlayerRef player)
     {
         if (HasStateAuthority)
         {
-            Vector3 _spawnPosition = GetSpawnPosition(_playerRef);
+            Vector3 spawnPosition = GetSpawnPosition(player);
+            NetworkObject playerNetworkObject = Runner.Spawn(_playerPrefab, spawnPosition, Quaternion.identity, player);
 
-            NetworkObject _playerNetworkObject = Runner.Spawn(_playerPrefab, _spawnPosition, Quaternion.identity, _playerRef);
-            _playerList.Add(_playerRef, _playerNetworkObject);
+            PlayerList.Add(player, playerNetworkObject);
         }
     }
 
@@ -30,10 +38,13 @@ public class PlayerSpawner : NetworkBehaviour, IPlayerJoined, IPlayerLeft
     {
         if (HasStateAuthority)
         {
-            if (_playerList.TryGetValue(player, out NetworkObject _playerNetworkObject))
+            if (PlayerList.TryGet(player, out NetworkObject playerNetworkObject))
             {
-                Runner.Despawn(_playerNetworkObject);
-                _playerList.Remove(player);
+                if (playerNetworkObject != null)
+                {
+                    Runner.Despawn(playerNetworkObject);
+                }
+                PlayerList.Remove(player);
             }
         }
     }
@@ -49,6 +60,35 @@ public class PlayerSpawner : NetworkBehaviour, IPlayerJoined, IPlayerLeft
 
         int spawnIndex = player.PlayerId % _spawnPoints.Length;
         return _spawnPoints[spawnIndex].position;
+    }
+
+    private void RefreshPlayerViews()
+    {
+        // Clear existing UI
+        foreach (Transform child in _playerParent.transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        // Rebuild UI from the current dictionary
+        foreach (var kvp in PlayerList)
+        {
+            NetworkObject playerNetworkObject = kvp.Value;
+
+            if (playerNetworkObject != null)
+            {
+                if (playerNetworkObject.TryGetComponent<TankData>(out var tankData))
+                {
+                    GameObject playerViewInstance = Instantiate(_playerView, _playerParent.transform);
+
+                    if (playerViewInstance.TryGetComponent<PlayerView>(out var playerViewComponent))
+                    {
+                        Debug.Log($"[PlayerSpawner] Binding data for player {tankData.PlayerName} with color {tankData.TankColor}");
+                        playerViewComponent.BindData(tankData.PlayerName.ToString(), tankData.TankColor);
+                    }
+                }
+            }
+        }
     }
     #endregion
 }
